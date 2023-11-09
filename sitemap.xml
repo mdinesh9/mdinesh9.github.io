@@ -4,336 +4,336 @@ xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitem
 xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
-<loc>http://localhost:8000/</loc>
-<lastmod>2023-11-09T13:20:46-00:00</lastmod>
+<loc>https://www.mdinesh.com/</loc>
+<lastmod>2023-11-09T13:31:22-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tags.html</loc>
-<lastmod>2023-11-09T13:20:46-00:00</lastmod>
+<loc>https://www.mdinesh.com/tags.html</loc>
+<lastmod>2023-11-09T13:31:22-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/categories.html</loc>
-<lastmod>2023-11-09T13:20:46-00:00</lastmod>
+<loc>https://www.mdinesh.com/categories.html</loc>
+<lastmod>2023-11-09T13:31:22-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/authors.html</loc>
-<lastmod>2023-11-09T13:20:46-00:00</lastmod>
+<loc>https://www.mdinesh.com/authors.html</loc>
+<lastmod>2023-11-09T13:31:22-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/archives.html</loc>
-<lastmod>2023-11-09T13:20:46-00:00</lastmod>
+<loc>https://www.mdinesh.com/archives.html</loc>
+<lastmod>2023-11-09T13:31:22-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/kubernetes-cron-jobs.html</loc>
+<loc>https://www.mdinesh.com/kubernetes-cron-jobs.html</loc>
 <lastmod>2023-02-05T00:00:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/asyncio-non-blocking-main-thread-for-long-running-tasks.html</loc>
+<loc>https://www.mdinesh.com/asyncio-non-blocking-main-thread-for-long-running-tasks.html</loc>
 <lastmod>2021-04-09T00:00:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/micro-services-12-factors.html</loc>
+<loc>https://www.mdinesh.com/micro-services-12-factors.html</loc>
 <lastmod>2019-05-02T00:00:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/lazy-loading.html</loc>
+<loc>https://www.mdinesh.com/lazy-loading.html</loc>
 <lastmod>2018-09-06T00:00:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/pattern-distributed-cloud-issues-circuit-breaker.html</loc>
+<loc>https://www.mdinesh.com/pattern-distributed-cloud-issues-circuit-breaker.html</loc>
 <lastmod>2018-08-21T00:00:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/pattern-distributed-cloud-transient-issues-retry.html</loc>
+<loc>https://www.mdinesh.com/pattern-distributed-cloud-transient-issues-retry.html</loc>
 <lastmod>2018-08-09T00:00:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/customer-segmentation-advertising-indiahacks.html</loc>
+<loc>https://www.mdinesh.com/customer-segmentation-advertising-indiahacks.html</loc>
 <lastmod>2016-10-02T21:27:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/land-cover-classification-european-conference-pkdd.html</loc>
+<loc>https://www.mdinesh.com/land-cover-classification-european-conference-pkdd.html</loc>
 <lastmod>2017-07-30T17:17:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/uber-cheap-prices.html</loc>
+<loc>https://www.mdinesh.com/uber-cheap-prices.html</loc>
 <lastmod>2017-06-02T19:30:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/benchmarking-data-file-formats.html</loc>
+<loc>https://www.mdinesh.com/benchmarking-data-file-formats.html</loc>
 <lastmod>2017-03-26T00:00:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/dask-dataframes.html</loc>
+<loc>https://www.mdinesh.com/dask-dataframes.html</loc>
 <lastmod>2016-10-02T21:27:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/first-ibm-watson-app.html</loc>
+<loc>https://www.mdinesh.com/first-ibm-watson-app.html</loc>
 <lastmod>2015-06-25T00:15:00+05:30</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/category/asynchronous-programming.html</loc>
+<loc>https://www.mdinesh.com/category/asynchronous-programming.html</loc>
 <lastmod>2021-04-09T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/category/data.html</loc>
+<loc>https://www.mdinesh.com/category/data.html</loc>
 <lastmod>2017-03-26T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/category/distributed-systems.html</loc>
+<loc>https://www.mdinesh.com/category/distributed-systems.html</loc>
 <lastmod>2018-08-21T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/category/kubernetes.html</loc>
+<loc>https://www.mdinesh.com/category/kubernetes.html</loc>
 <lastmod>2023-02-05T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/category/life-hack.html</loc>
+<loc>https://www.mdinesh.com/category/life-hack.html</loc>
 <lastmod>2017-06-02T19:30:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/category/machine-learning.html</loc>
+<loc>https://www.mdinesh.com/category/machine-learning.html</loc>
 <lastmod>2017-10-10T13:34:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/category/machine-learning-in-production.html</loc>
+<loc>https://www.mdinesh.com/category/machine-learning-in-production.html</loc>
 <lastmod>2018-09-06T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/category/micro-services.html</loc>
+<loc>https://www.mdinesh.com/category/micro-services.html</loc>
 <lastmod>2019-05-02T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/category/out-of-core-computations.html</loc>
+<loc>https://www.mdinesh.com/category/out-of-core-computations.html</loc>
 <lastmod>2016-10-02T21:27:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/category/visual-recognition-ibm-watson.html</loc>
+<loc>https://www.mdinesh.com/category/visual-recognition-ibm-watson.html</loc>
 <lastmod>2015-06-25T00:15:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/distributed-systems.html</loc>
+<loc>https://www.mdinesh.com/tag/distributed-systems.html</loc>
 <lastmod>2023-02-05T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/kubernetes.html</loc>
+<loc>https://www.mdinesh.com/tag/kubernetes.html</loc>
 <lastmod>2023-02-05T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/micro-services.html</loc>
+<loc>https://www.mdinesh.com/tag/micro-services.html</loc>
 <lastmod>2023-02-05T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/machine-learning-operations.html</loc>
+<loc>https://www.mdinesh.com/tag/machine-learning-operations.html</loc>
 <lastmod>2023-02-05T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/distributed-computing.html</loc>
+<loc>https://www.mdinesh.com/tag/distributed-computing.html</loc>
 <lastmod>2021-04-09T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/asynchronous-programming.html</loc>
+<loc>https://www.mdinesh.com/tag/asynchronous-programming.html</loc>
 <lastmod>2021-04-09T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/lazy-loading.html</loc>
+<loc>https://www.mdinesh.com/tag/lazy-loading.html</loc>
 <lastmod>2018-09-06T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/latency.html</loc>
+<loc>https://www.mdinesh.com/tag/latency.html</loc>
 <lastmod>2018-09-06T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/patterns.html</loc>
+<loc>https://www.mdinesh.com/tag/patterns.html</loc>
 <lastmod>2018-08-21T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/circuit-breaker.html</loc>
+<loc>https://www.mdinesh.com/tag/circuit-breaker.html</loc>
 <lastmod>2018-08-21T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/retry.html</loc>
+<loc>https://www.mdinesh.com/tag/retry.html</loc>
 <lastmod>2018-08-09T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/machine-learning.html</loc>
+<loc>https://www.mdinesh.com/tag/machine-learning.html</loc>
 <lastmod>2017-10-10T13:34:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/competitions.html</loc>
+<loc>https://www.mdinesh.com/tag/competitions.html</loc>
 <lastmod>2017-10-10T13:34:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/natural-language-processing.html</loc>
+<loc>https://www.mdinesh.com/tag/natural-language-processing.html</loc>
 <lastmod>2017-10-10T13:34:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/hacks.html</loc>
+<loc>https://www.mdinesh.com/tag/hacks.html</loc>
 <lastmod>2017-06-02T19:30:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/data-engineering.html</loc>
+<loc>https://www.mdinesh.com/tag/data-engineering.html</loc>
 <lastmod>2017-03-26T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/benchmarking.html</loc>
+<loc>https://www.mdinesh.com/tag/benchmarking.html</loc>
 <lastmod>2017-03-26T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/dask.html</loc>
+<loc>https://www.mdinesh.com/tag/dask.html</loc>
 <lastmod>2016-10-02T21:27:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/ibm-watson.html</loc>
+<loc>https://www.mdinesh.com/tag/ibm-watson.html</loc>
 <lastmod>2015-06-25T00:15:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/tag/visual-recognition.html</loc>
+<loc>https://www.mdinesh.com/tag/visual-recognition.html</loc>
 <lastmod>2015-06-25T00:15:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
-<loc>http://localhost:8000/author/dinesh.html</loc>
+<loc>https://www.mdinesh.com/author/dinesh.html</loc>
 <lastmod>2023-02-05T00:00:00+05:53</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.6</priority>
