@@ -1,5 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Machine Learning in Production</title><link href="https://www.mdinesh.com/" rel="alternate"></link><link href="https://www.mdinesh.com/feeds/machine-learning-in-production.atom.xml" rel="self"></link><id>https://www.mdinesh.com/</id><updated>2018-09-06T00:00:00+05:30</updated><entry><title>Production | Machine Learning / Optimizing ML Inference Pipelines with Lazy Loading</title><link href="https://www.mdinesh.com/lazy-loading.html" rel="alternate"></link><published>2018-09-06T00:00:00+05:30</published><updated>2018-09-06T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2018-09-06:/lazy-loading.html</id><summary type="html">&lt;p&gt;How can we use Lazy loading to reduce latency, improve user experience and use resources efficiently&lt;/p&gt;</summary><content type="html">&lt;p&gt;If you have operationalized a Machine Learning or Deep Learning model in Production or on top of cloud and when you have to generate predictions on demand, you would know how important latency is.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Machine Learning in Production</title><link href="https://www.mdinesh.com/" rel="alternate"></link><link href="https://www.mdinesh.com/feeds/machine-learning-in-production.atom.xml" rel="self"></link><id>https://www.mdinesh.com/</id><updated>2022-11-02T04:30:00+05:30</updated><entry><title>Deploying Docker images &amp; Python packages using Makefile</title><link href="https://www.mdinesh.com/deployment-with-makefile.html" rel="alternate"></link><published>2022-11-02T04:30:00+05:30</published><updated>2022-11-02T04:30:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2022-11-02:/deployment-with-makefile.html</id><summary type="html">&lt;p&gt;Using Makefile to build and push Docker images to Registry&lt;/p&gt;</summary><content type="html">&lt;p&gt;Suppose that there are a series of build and push commands that we need to do inorder to build a docker image and push it to artifact registry for example, Makefile can help us run a series of commands in serial order in command line which helps us kind of semi automate this process.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;FROM&lt;span class="w"&gt; &lt;/span&gt;python:3.10
+
+LABEL&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;maintainer&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;Dinesh
+ENV&lt;span class="w"&gt; &lt;/span&gt;PYTHONBUFFERED&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
+
+WORKDIR&lt;span class="w"&gt; &lt;/span&gt;/app/
+RUN&lt;span class="w"&gt; &lt;/span&gt;mkdir&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;./src
+ADD&lt;span class="w"&gt; &lt;/span&gt;.&lt;span class="w"&gt; &lt;/span&gt;/src/
+
+
+
+RUN&lt;span class="w"&gt; &lt;/span&gt;pip&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;keyring&lt;span class="w"&gt; &lt;/span&gt;keyrings.google-artifactregistry-auth
+
+RUN&lt;span class="w"&gt; &lt;/span&gt;--mount&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;secret,id&lt;span class="o"&gt;=&lt;/span&gt;creds,target&lt;span class="o"&gt;=&lt;/span&gt;/root/.config/gcloud/application_default_credentials.json&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;pip&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;--no-cache-dir&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;requirements.txt
+
+RUN&lt;span class="w"&gt; &lt;/span&gt;chmod&lt;span class="w"&gt; &lt;/span&gt;+x&lt;span class="w"&gt; &lt;/span&gt;./src/startup_script.sh
+
+ENTRYPOINT&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;./src/startup_script.sh&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In any project, we first write a Dockerfile, build this file, push the docker image to artifact registry, and then use Kubernetes manifest to pull and install the docker image.&lt;/p&gt;
+&lt;p&gt;I will give an example of building and pushing the Docker image to Artifact registry&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;GCR_URL&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;asia-docker.pkg.dev/gcp-project-name
+&lt;span class="nv"&gt;REGISTRY_URL&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;asia-northeast1-python.pkg.dev
+&lt;span class="nv"&gt;BASE_IMAGE_NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;services/run_training_job
+&lt;span class="nv"&gt;BASE_IMAGE_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;base-0.1
+&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;services/run_training_job
+&lt;span class="nv"&gt;STAGING_IMAGE_TAG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;staging-0.1
+&lt;span class="nv"&gt;PRODUCTION_IMAGE_TAG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;production-0.1
+&lt;span class="nv"&gt;IMAGE_TAG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;PRODUCTION_IMAGE_TAG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="nv"&gt;ENV&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;prod
+
+build_and_push:
+&lt;span class="w"&gt;  &lt;/span&gt;docker-build&lt;span class="w"&gt; &lt;/span&gt;docker-push
+
+docker-build:
+&lt;span class="w"&gt;  &lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;build&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;Dockerfile&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BASE_IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_TAG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--no-cache&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;--build-arg&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;BASE_IMAGE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GCR_URL&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BASE_IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BASE_IMAGE_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;.
+
+docker-push:
+&lt;span class="w"&gt;  &lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;tag&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_TAG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GCR_URL&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_TAG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;gcloud&lt;span class="w"&gt; &lt;/span&gt;auth&lt;span class="w"&gt; &lt;/span&gt;login
+&lt;span class="w"&gt;  &lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;push&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GCR_URL&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_TAG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If we run the following command, it will take care of building and push the image to artifact registry&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;make&lt;span class="w"&gt; &lt;/span&gt;build_and_push
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;build_and_push command is actually executing two other steps, first docker-build and the docker-push&lt;/p&gt;</content><category term="Machine Learning in Production"></category><category term="Machine Learning Operations"></category><category term="Makefile"></category><category term="Docker"></category></entry><entry><title>Code Profiling and Memory Profiling in Python: Optimizing Performance and Resource Usage</title><link href="https://www.mdinesh.com/code-profiling-and-memory-profiling.html" rel="alternate"></link><published>2020-02-07T04:30:00+05:30</published><updated>2020-02-07T04:30:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2020-02-07:/code-profiling-and-memory-profiling.html</id><summary type="html">&lt;p&gt;use code profiler and memory profiler&lt;/p&gt;</summary><content type="html">&lt;p&gt;As Python developers, we strive to write efficient and performant code, but understanding where our code spends its time and how it utilizes memory can be a daunting task. This is where profiling comes to the rescue. In this blog post, we'll explore the realms of code profiling and memory profiling in Python, unraveling the mysteries behind optimizing your applications.&lt;/p&gt;
+&lt;h3&gt;Code Profiling:&lt;/h3&gt;
+&lt;p&gt;Code profiling involves analyzing the execution time of different parts of your code to identify bottlenecks and areas for improvement. Python provides a built-in module called cProfile that helps us achieve this.&lt;/p&gt;
+&lt;p&gt;Let's consider a simple example. Imagine you have a script that calculates the sum of squares up to a certain number. In the below code I have intentionally added time.sleep for 0.1 second after every result computation.&lt;/p&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;sum_of_squares&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+        &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;To profile this code:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;cProfile&lt;/span&gt;
+
+&lt;span class="n"&gt;cProfile&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;sum_of_squares(100)&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And here is the result of code profiling:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="c_profile" src="images/../../images/profiling_code/c_profile.png"&gt;&lt;/p&gt;
+&lt;p&gt;In the above image, for each line of code, we can see number of calls, total time elapsed at the specific line, time per call, cumulative time, and percentage of time / call.&lt;/p&gt;
+&lt;p&gt;In the line highlighted in red, we can see the most amunt of time &amp;amp; most amount of calls are spent at time.sleep function&lt;/p&gt;
+&lt;h3&gt;Memory Profiling:&lt;/h3&gt;
+&lt;p&gt;Similarly during memory profiling we analyze the amount of memory that is consumed at each line.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;memory_profiler&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;profile&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;pd&lt;/span&gt;
+
+&lt;span class="nd"&gt;@profile&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;generate_squares&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;squares&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+
+    &lt;span class="n"&gt;sample_df&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DataFrame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;a&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;b&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;squares&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;generate_squares&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In the above code, I am creating a sample_df dataframe using pandas and when I did memory profiling these are the results.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="memory_profiler" src="images/../../images/profiling_code/memory_profiler.png"&gt;&lt;/p&gt;
+&lt;p&gt;We can see that the line where we are creating the sample pandas dataframe is consuming the highest amount of memory.&lt;/p&gt;
+&lt;p&gt;Profiling code and memory can help us in:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mf"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Reducing&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;execution&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;time&lt;/span&gt;
+&lt;span class="mf"&gt;2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Identifying&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;performance&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;bottlenecks&lt;/span&gt;
+&lt;span class="mf"&gt;3&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Detect&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;Prevent&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;of&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;memory&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;errors&lt;/span&gt;
+&lt;span class="mf"&gt;4&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Optimizing&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;memory&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;usage&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Machine Learning in Production"></category><category term="Production"></category><category term="Performance"></category></entry><entry><title>Production | Machine Learning / Optimizing ML Inference Pipelines with Lazy Loading</title><link href="https://www.mdinesh.com/lazy-loading.html" rel="alternate"></link><published>2018-09-06T00:00:00+05:30</published><updated>2018-09-06T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2018-09-06:/lazy-loading.html</id><summary type="html">&lt;p&gt;How can we use Lazy loading to reduce latency, improve user experience and use resources efficiently&lt;/p&gt;</summary><content type="html">&lt;p&gt;If you have operationalized a Machine Learning or Deep Learning model in Production or on top of cloud and when you have to generate predictions on demand, you would know how important latency is.&lt;/p&gt;
 &lt;p&gt;It is a very bad idea to load a model every time whenever there is a prediction request. 
 Moreover, If you have the model on top of cloud, it will increase the cost for data transfer, and increased latency as well.&lt;/p&gt;
 &lt;p&gt;Lazy Loading is a pattern where, we load the model once, store it in a cache, and load from cache every time a prediction request is generated.&lt;/p&gt;

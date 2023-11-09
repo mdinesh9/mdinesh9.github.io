@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Self Driving Cars, Image</title><link href="http://localhost:8000/" rel="alternate"></link><link href="http://localhost:8000/feeds/self-driving-cars-image.atom.xml" rel="self"></link><id>http://localhost:8000/</id><updated>2018-08-11T13:15:00+05:30</updated><entry><title>Region Masking on an Image</title><link href="http://localhost:8000/region-masking-on-an-image.html" rel="alternate"></link><published>2018-08-11T13:15:00+05:30</published><updated>2018-08-11T13:15:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2018-08-11:/region-masking-on-an-image.html</id><summary type="html">&lt;p&gt;Region masking on an image&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Objective:&lt;/h2&gt;
+&lt;p&gt;The objective of region masking is identifying the triangular region infront of the car where the lane lines are falling. &lt;/p&gt;
+&lt;h2&gt;Pen and Paper:&lt;/h2&gt;
+&lt;p&gt;I spent a lot of time understanding/breaking down this concept by using pen and paper because this has little bit of math involved.&lt;/p&gt;
+&lt;p&gt;To understand this concept, lets go through what I did on the paper.&lt;/p&gt;
+&lt;p&gt;Pick some random vertices(left, right, and apex) points which fall inside the size of the image.&lt;/p&gt;
+&lt;p&gt;If you look at the below screenshot, I used&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;left = (0, 400)
+right = (700, 450)
+apex = (370, 0)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then I plotted these vertices on the graph as seen below.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/sdc_udacity/region_masking_triangle_vertices.jpg" alt="Vertices of triangle written on a paper" style="width: 500px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Then I computed slope and intercepts for the following lines&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;left to apex
+apex to right
+left to right
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src="images/sdc_udacity/region_masking_slope_and_intercepts.jpg" alt="Computing slope and intercepts" style="width: 500px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;We got the following Coefficients(slope and intercepts)&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/sdc_udacity/region_masking_slope_and_intercepts_breakup.jpg" alt="Slope and Intercepts in a table" style="width: 500px; height: 200px;"/&gt;&lt;/p&gt;
+&lt;h2&gt;Create a Mesh grid using the height and width of the image&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Note&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;In&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;order&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;understand&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;concept&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;I&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;used&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;very&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;small&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src="images/sdc_udacity/meshgrid_example_with_10_by_10.png" alt="Create a numpy meshgrid with the image of size 10 x 10" style="width: 700px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;See the values of XX, and YY&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/sdc_udacity/meshgrid_XX_and_YY_values.png" alt="Create a numpy meshgrid with the image of size 10 x 10" style="width: 400px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Then we use the slope and intercept to find the region inside the triangle. &lt;/p&gt;
+&lt;p&gt;If you look at the image below, we are finding the regions inside the vertices using slope and intercept and then finding the values where they occur and marking them as Booleans.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/sdc_udacity/region_masking_finding_boundaries.png" alt="Use the slope and intercepts to find the region inside the triangle" style="width: 400px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Note&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;I&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;used&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;example&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;understand&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;concepts&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;described&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;above&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;But&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;when&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;you&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;implement&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;above&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;concepts&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;on&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;an&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;mask&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;triangular&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;region&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;it&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;would&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;look&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;something&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;like&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src="images/sdc_udacity/region_masking_on_an_image_example.png" alt="Region masking example" style="width: 400px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Ofcourse, this is just and example and it is not around the lane lines.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;References&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Find coefficients - slope &amp;amp; intercept - https://www.youtube.com/watch?v=4il4haYASys&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Self Driving Cars, Image"></category><category term="Self Driving Cars"></category><category term="Image"></category><category term="Pen &amp; Paper"></category></entry></feed>

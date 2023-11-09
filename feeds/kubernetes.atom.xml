@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Kubernetes</title><link href="https://www.mdinesh.com/" rel="alternate"></link><link href="https://www.mdinesh.com/feeds/kubernetes.atom.xml" rel="self"></link><id>https://www.mdinesh.com/</id><updated>2023-02-05T00:00:00+05:30</updated><entry><title>Kubernetes / Kubernetes Cron to schedule recurring jobs within Kubernetes Pods</title><link href="https://www.mdinesh.com/kubernetes-cron-jobs.html" rel="alternate"></link><published>2023-02-05T00:00:00+05:30</published><updated>2023-02-05T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2023-02-05:/kubernetes-cron-jobs.html</id><summary type="html">&lt;p&gt;Run cron jobs on Kubernetes&lt;/p&gt;</summary><content type="html">&lt;p&gt;Cron jobs are scheduled tasks that run automatically at specified times or intervals in a production environment, such as regularly backing up a database or sending daily reports, ensuring that important processes occur on time without manual intervention.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Kubernetes</title><link href="https://www.mdinesh.com/" rel="alternate"></link><link href="https://www.mdinesh.com/feeds/kubernetes.atom.xml" rel="self"></link><id>https://www.mdinesh.com/</id><updated>2023-02-05T00:00:00+05:30</updated><entry><title>Kubernetes Cron to schedule recurring jobs within Kubernetes Pods</title><link href="https://www.mdinesh.com/kubernetes-cron-jobs.html" rel="alternate"></link><published>2023-02-05T00:00:00+05:30</published><updated>2023-02-05T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2023-02-05:/kubernetes-cron-jobs.html</id><summary type="html">&lt;p&gt;Run cron jobs on Kubernetes&lt;/p&gt;</summary><content type="html">&lt;p&gt;Cron jobs are scheduled tasks that run automatically at specified times or intervals in a production environment, such as regularly backing up a database or sending daily reports, ensuring that important processes occur on time without manual intervention.&lt;/p&gt;
 &lt;p&gt;If you are using Kubernetes to automate the deployment, scaling, and management of containerized applications, Kubernetes Cron can help us take care of scheduling cron jobs to run on pods.&lt;/p&gt;
 &lt;p&gt;Examples of some of the tasks that we might want to do are we can check the status of the pods, update database records, send emails, slack messages and so on.&lt;/p&gt;
 &lt;p&gt;Below is the diagram of how Kubernetes cron works:&lt;/p&gt;
@@ -54,4 +54,35 @@ spec:
 &lt;li&gt;Validate if the job is created&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;cronjob&lt;span class="w"&gt; &lt;/span&gt;status-cron
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Kubernetes"></category><category term="Distributed Systems"></category><category term="Kubernetes"></category><category term="Micro Services"></category><category term="Machine Learning Operations"></category></entry></feed>
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Kubernetes"></category><category term="Distributed Systems"></category><category term="Kubernetes"></category><category term="Micro Services"></category><category term="Machine Learning Operations"></category></entry><entry><title>Kubernetes Rolling Upgrade: A Smooth Transition to New Versions</title><link href="https://www.mdinesh.com/kubernetes-rolling-upgrade.html" rel="alternate"></link><published>2022-12-13T00:00:00+05:30</published><updated>2022-12-13T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2022-12-13:/kubernetes-rolling-upgrade.html</id><summary type="html">&lt;p&gt;Perform smooth upgrades using Rolling upgrade&lt;/p&gt;</summary><content type="html">&lt;p&gt;Updating applications running on Kubernetes, even though can be done easily with kubernetes manifests or any other tools, it is difficult to do it without shutting down the pods or having some downtime.&lt;/p&gt;
+&lt;p&gt;This is where rolling upgrades come into play by helping us with seamless transitions to new application versions without downtime.&lt;/p&gt;
+&lt;p&gt;A rolling upgrade is a deployment strategy that gradually replaces the old pods (containers) of an application with new ones. Unlike blue-green deployments, which involve switching between entirely different versions of the application, rolling upgrades minimize disruption by incrementally updating pods. This approach ensures that the application remains available throughout the update process, providing a smooth user experience.&lt;/p&gt;
+&lt;p&gt;When a Deployment manifest is updated, the controller identifies the desired state of the application, including the number of pods and their desired container image. The controller then compares the current state to the desired state and starts replacing old pods with new ones.&lt;/p&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;apiVersion:&lt;span class="w"&gt; &lt;/span&gt;apps/v1
+kind:&lt;span class="w"&gt; &lt;/span&gt;Deployment
+metadata:
+&lt;span class="w"&gt;  &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;my-application
+spec:
+&lt;span class="w"&gt;  &lt;/span&gt;replicas:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Desired number of pods&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;selector:
+&lt;span class="w"&gt;    &lt;/span&gt;matchLabels:
+&lt;span class="w"&gt;      &lt;/span&gt;app:&lt;span class="w"&gt; &lt;/span&gt;my-application
+&lt;span class="w"&gt;  &lt;/span&gt;strategy:
+&lt;span class="w"&gt;    &lt;/span&gt;rollingUpdate:
+&lt;span class="w"&gt;      &lt;/span&gt;maxUnavailable:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Allow up to one pod to be unavailable during the upgrade&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;maxSurge:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Allow up to one additional pod to run during the upgrade&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;template:
+&lt;span class="w"&gt;    &lt;/span&gt;metadata:
+&lt;span class="w"&gt;      &lt;/span&gt;labels:
+&lt;span class="w"&gt;        &lt;/span&gt;app:&lt;span class="w"&gt; &lt;/span&gt;my-application
+&lt;span class="w"&gt;    &lt;/span&gt;spec:
+&lt;span class="w"&gt;      &lt;/span&gt;containers:
+&lt;span class="w"&gt;      &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;my-container
+&lt;span class="w"&gt;        &lt;/span&gt;image:&lt;span class="w"&gt; &lt;/span&gt;nginx:latest&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Updated container image&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;ports:
+&lt;span class="w"&gt;        &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;containerPort:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;80&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The maxUnavailable and maxSurge parameters ensure that the application remains available throughout the upgrade process by limiting the number of pods that can be unavailable or running simultaneously.&lt;/p&gt;
+&lt;p&gt;This way rolling upgrades can help us in reduced downtime, smooth rollout of latest features or bugfixes.&lt;/p&gt;</content><category term="Kubernetes"></category><category term="Kubernetes"></category><category term="Micro Services"></category><category term="Machine Learning Operations"></category></entry></feed>

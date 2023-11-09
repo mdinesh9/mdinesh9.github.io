@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://www.mdinesh.com/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://www.mdinesh.com/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Dinesh" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Self Driving Cars, Image, Pen & Paper, Self Driving Cars, " />
+
+<meta property="og:title" content="Region Masking on an Image "/>
+<meta property="og:url" content="https://www.mdinesh.com/region-masking-on-an-image.html" />
+<meta property="og:description" content="Region masking on an image" />
+<meta property="og:site_name" content="Dinesh&#39;s Journal" />
+<meta property="og:article:author" content="Dinesh" />
+<meta property="og:article:published_time" content="2018-08-11T13:15:00+05:30" />
+<meta property="og:article:modified_time" content="2018-08-11T13:15:00+05:30" />
+<meta name="twitter:title" content="Region Masking on an Image ">
+<meta name="twitter:description" content="Region masking on an image">
+
+        <title>Region Masking on an Image  · Dinesh&#39;s Journal
+</title>
+        <link href="https://www.mdinesh.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dinesh&#39;s Journal - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://www.mdinesh.com/"><span class=site-name>Dinesh's Journal</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://www.mdinesh.com
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://www.mdinesh.com/categories.html">Categories</a></li>
+                                <li ><a href="https://www.mdinesh.com/tags.html">Tags</a></li>
+                                <li ><a href="https://www.mdinesh.com/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://www.mdinesh.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://www.mdinesh.com/region-masking-on-an-image.html">
+                Region Masking on an Image
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h2>Objective:</h2>
+<p>The objective of region masking is identifying the triangular region infront of the car where the lane lines are falling. </p>
+<h2>Pen and Paper:</h2>
+<p>I spent a lot of time understanding/breaking down this concept by using pen and paper because this has little bit of math involved.</p>
+<p>To understand this concept, lets go through what I did on the paper.</p>
+<p>Pick some random vertices(left, right, and apex) points which fall inside the size of the image.</p>
+<p>If you look at the below screenshot, I used</p>
+<div class="highlight"><pre><span></span><code>left = (0, 400)
+right = (700, 450)
+apex = (370, 0)
+</code></pre></div>
+
+<p>Then I plotted these vertices on the graph as seen below.</p>
+<p><img src="images/sdc_udacity/region_masking_triangle_vertices.jpg" alt="Vertices of triangle written on a paper" style="width: 500px; height: 500px;"/></p>
+<p>Then I computed slope and intercepts for the following lines</p>
+<div class="highlight"><pre><span></span><code>left to apex
+apex to right
+left to right
+</code></pre></div>
+
+<p><img src="images/sdc_udacity/region_masking_slope_and_intercepts.jpg" alt="Computing slope and intercepts" style="width: 500px; height: 500px;"/></p>
+<p>We got the following Coefficients(slope and intercepts)</p>
+<p><img src="images/sdc_udacity/region_masking_slope_and_intercepts_breakup.jpg" alt="Slope and Intercepts in a table" style="width: 500px; height: 200px;"/></p>
+<h2>Create a Mesh grid using the height and width of the image</h2>
+<div class="highlight"><pre><span></span><code><span class="n">Note</span><span class="o">:</span><span class="w"> </span><span class="n">In</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">understand</span><span class="w"> </span><span class="k">this</span><span class="w"> </span><span class="n">concept</span><span class="o">,</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">very</span><span class="w"> </span><span class="n">small</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">10</span>
+</code></pre></div>
+
+<p><img src="images/sdc_udacity/meshgrid_example_with_10_by_10.png" alt="Create a numpy meshgrid with the image of size 10 x 10" style="width: 700px; height: 500px;"/></p>
+<p>See the values of XX, and YY</p>
+<p><img src="images/sdc_udacity/meshgrid_XX_and_YY_values.png" alt="Create a numpy meshgrid with the image of size 10 x 10" style="width: 400px; height: 500px;"/></p>
+<p>Then we use the slope and intercept to find the region inside the triangle. </p>
+<p>If you look at the image below, we are finding the regions inside the vertices using slope and intercept and then finding the values where they occur and marking them as Booleans.</p>
+<p><img src="images/sdc_udacity/region_masking_finding_boundaries.png" alt="Use the slope and intercepts to find the region inside the triangle" style="width: 400px; height: 500px;"/></p>
+<div class="highlight"><pre><span></span><code><span class="n">Note</span><span class="o">:</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">example</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">understand</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">concepts</span><span class="w"> </span><span class="n">described</span><span class="w"> </span><span class="n">above</span><span class="o">.</span><span class="w"> </span><span class="n">But</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">implement</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">above</span><span class="w"> </span><span class="n">concepts</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">mask</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">triangular</span><span class="w"> </span><span class="n">region</span><span class="o">,</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">would</span><span class="w"> </span><span class="n">look</span><span class="w"> </span><span class="n">something</span><span class="w"> </span><span class="n">like</span><span class="w"> </span><span class="k">this</span><span class="o">.</span>
+</code></pre></div>
+
+<p><img src="images/sdc_udacity/region_masking_on_an_image_example.png" alt="Region masking example" style="width: 400px; height: 500px;"/></p>
+<div class="highlight"><pre><span></span><code>Ofcourse, this is just and example and it is not around the lane lines.
+</code></pre></div>
+
+<h3>References</h3>
+<ul>
+<li>Find coefficients - slope &amp; intercept - https://www.youtube.com/watch?v=4il4haYASys</li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2018-08-11T13:15:00+05:30">Sat 11 August 2018</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="https://www.mdinesh.com/categories.html#self-driving-cars-ref">Self Driving Cars</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://www.mdinesh.com/tags.html#image-ref">Image
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://www.mdinesh.com/tags.html#pen-paper-ref">Pen & Paper
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://www.mdinesh.com/tags.html#self-driving-cars-ref">Self Driving Cars
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://www.mdinesh.com/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

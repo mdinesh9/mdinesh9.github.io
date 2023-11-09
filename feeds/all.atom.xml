@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal</title><link href="https://www.mdinesh.com/" rel="alternate"></link><link href="https://www.mdinesh.com/feeds/all.atom.xml" rel="self"></link><id>https://www.mdinesh.com/</id><updated>2023-02-05T00:00:00+05:30</updated><entry><title>Kubernetes / Kubernetes Cron to schedule recurring jobs within Kubernetes Pods</title><link href="https://www.mdinesh.com/kubernetes-cron-jobs.html" rel="alternate"></link><published>2023-02-05T00:00:00+05:30</published><updated>2023-02-05T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2023-02-05:/kubernetes-cron-jobs.html</id><summary type="html">&lt;p&gt;Run cron jobs on Kubernetes&lt;/p&gt;</summary><content type="html">&lt;p&gt;Cron jobs are scheduled tasks that run automatically at specified times or intervals in a production environment, such as regularly backing up a database or sending daily reports, ensuring that important processes occur on time without manual intervention.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal</title><link href="https://www.mdinesh.com/" rel="alternate"></link><link href="https://www.mdinesh.com/feeds/all.atom.xml" rel="self"></link><id>https://www.mdinesh.com/</id><updated>2023-02-05T00:00:00+05:30</updated><entry><title>Kubernetes Cron to schedule recurring jobs within Kubernetes Pods</title><link href="https://www.mdinesh.com/kubernetes-cron-jobs.html" rel="alternate"></link><published>2023-02-05T00:00:00+05:30</published><updated>2023-02-05T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2023-02-05:/kubernetes-cron-jobs.html</id><summary type="html">&lt;p&gt;Run cron jobs on Kubernetes&lt;/p&gt;</summary><content type="html">&lt;p&gt;Cron jobs are scheduled tasks that run automatically at specified times or intervals in a production environment, such as regularly backing up a database or sending daily reports, ensuring that important processes occur on time without manual intervention.&lt;/p&gt;
 &lt;p&gt;If you are using Kubernetes to automate the deployment, scaling, and management of containerized applications, Kubernetes Cron can help us take care of scheduling cron jobs to run on pods.&lt;/p&gt;
 &lt;p&gt;Examples of some of the tasks that we might want to do are we can check the status of the pods, update database records, send emails, slack messages and so on.&lt;/p&gt;
 &lt;p&gt;Below is the diagram of how Kubernetes cron works:&lt;/p&gt;
@@ -54,7 +54,91 @@ spec:
 &lt;li&gt;Validate if the job is created&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;cronjob&lt;span class="w"&gt; &lt;/span&gt;status-cron
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Kubernetes"></category><category term="Distributed Systems"></category><category term="Kubernetes"></category><category term="Micro Services"></category><category term="Machine Learning Operations"></category></entry><entry><title>Asynchronous Programming / Asyncio for Long running tasks without blocking main thread</title><link href="https://www.mdinesh.com/asyncio-non-blocking-main-thread-for-long-running-tasks.html" rel="alternate"></link><published>2021-04-09T00:00:00+05:30</published><updated>2021-04-09T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2021-04-09:/asyncio-non-blocking-main-thread-for-long-running-tasks.html</id><summary type="html">&lt;p&gt;Use asyncio without blocking main thread for running time taking tasks.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Asynchronous programming is a powerful technique that can be used to improve the performance and scalability of Python applications.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Kubernetes"></category><category term="Distributed Systems"></category><category term="Kubernetes"></category><category term="Micro Services"></category><category term="Machine Learning Operations"></category></entry><entry><title>Kubernetes Rolling Upgrade: A Smooth Transition to New Versions</title><link href="https://www.mdinesh.com/kubernetes-rolling-upgrade.html" rel="alternate"></link><published>2022-12-13T00:00:00+05:30</published><updated>2022-12-13T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2022-12-13:/kubernetes-rolling-upgrade.html</id><summary type="html">&lt;p&gt;Perform smooth upgrades using Rolling upgrade&lt;/p&gt;</summary><content type="html">&lt;p&gt;Updating applications running on Kubernetes, even though can be done easily with kubernetes manifests or any other tools, it is difficult to do it without shutting down the pods or having some downtime.&lt;/p&gt;
+&lt;p&gt;This is where rolling upgrades come into play by helping us with seamless transitions to new application versions without downtime.&lt;/p&gt;
+&lt;p&gt;A rolling upgrade is a deployment strategy that gradually replaces the old pods (containers) of an application with new ones. Unlike blue-green deployments, which involve switching between entirely different versions of the application, rolling upgrades minimize disruption by incrementally updating pods. This approach ensures that the application remains available throughout the update process, providing a smooth user experience.&lt;/p&gt;
+&lt;p&gt;When a Deployment manifest is updated, the controller identifies the desired state of the application, including the number of pods and their desired container image. The controller then compares the current state to the desired state and starts replacing old pods with new ones.&lt;/p&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;apiVersion:&lt;span class="w"&gt; &lt;/span&gt;apps/v1
+kind:&lt;span class="w"&gt; &lt;/span&gt;Deployment
+metadata:
+&lt;span class="w"&gt;  &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;my-application
+spec:
+&lt;span class="w"&gt;  &lt;/span&gt;replicas:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Desired number of pods&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;selector:
+&lt;span class="w"&gt;    &lt;/span&gt;matchLabels:
+&lt;span class="w"&gt;      &lt;/span&gt;app:&lt;span class="w"&gt; &lt;/span&gt;my-application
+&lt;span class="w"&gt;  &lt;/span&gt;strategy:
+&lt;span class="w"&gt;    &lt;/span&gt;rollingUpdate:
+&lt;span class="w"&gt;      &lt;/span&gt;maxUnavailable:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Allow up to one pod to be unavailable during the upgrade&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;maxSurge:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Allow up to one additional pod to run during the upgrade&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;template:
+&lt;span class="w"&gt;    &lt;/span&gt;metadata:
+&lt;span class="w"&gt;      &lt;/span&gt;labels:
+&lt;span class="w"&gt;        &lt;/span&gt;app:&lt;span class="w"&gt; &lt;/span&gt;my-application
+&lt;span class="w"&gt;    &lt;/span&gt;spec:
+&lt;span class="w"&gt;      &lt;/span&gt;containers:
+&lt;span class="w"&gt;      &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;my-container
+&lt;span class="w"&gt;        &lt;/span&gt;image:&lt;span class="w"&gt; &lt;/span&gt;nginx:latest&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Updated container image&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;ports:
+&lt;span class="w"&gt;        &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;containerPort:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;80&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The maxUnavailable and maxSurge parameters ensure that the application remains available throughout the upgrade process by limiting the number of pods that can be unavailable or running simultaneously.&lt;/p&gt;
+&lt;p&gt;This way rolling upgrades can help us in reduced downtime, smooth rollout of latest features or bugfixes.&lt;/p&gt;</content><category term="Kubernetes"></category><category term="Kubernetes"></category><category term="Micro Services"></category><category term="Machine Learning Operations"></category></entry><entry><title>Deploying Docker images &amp; Python packages using Makefile</title><link href="https://www.mdinesh.com/deployment-with-makefile.html" rel="alternate"></link><published>2022-11-02T04:30:00+05:30</published><updated>2022-11-02T04:30:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2022-11-02:/deployment-with-makefile.html</id><summary type="html">&lt;p&gt;Using Makefile to build and push Docker images to Registry&lt;/p&gt;</summary><content type="html">&lt;p&gt;Suppose that there are a series of build and push commands that we need to do inorder to build a docker image and push it to artifact registry for example, Makefile can help us run a series of commands in serial order in command line which helps us kind of semi automate this process.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;FROM&lt;span class="w"&gt; &lt;/span&gt;python:3.10
+
+LABEL&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;maintainer&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;Dinesh
+ENV&lt;span class="w"&gt; &lt;/span&gt;PYTHONBUFFERED&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
+
+WORKDIR&lt;span class="w"&gt; &lt;/span&gt;/app/
+RUN&lt;span class="w"&gt; &lt;/span&gt;mkdir&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;./src
+ADD&lt;span class="w"&gt; &lt;/span&gt;.&lt;span class="w"&gt; &lt;/span&gt;/src/
+
+
+
+RUN&lt;span class="w"&gt; &lt;/span&gt;pip&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;keyring&lt;span class="w"&gt; &lt;/span&gt;keyrings.google-artifactregistry-auth
+
+RUN&lt;span class="w"&gt; &lt;/span&gt;--mount&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;secret,id&lt;span class="o"&gt;=&lt;/span&gt;creds,target&lt;span class="o"&gt;=&lt;/span&gt;/root/.config/gcloud/application_default_credentials.json&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;pip&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;--no-cache-dir&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;requirements.txt
+
+RUN&lt;span class="w"&gt; &lt;/span&gt;chmod&lt;span class="w"&gt; &lt;/span&gt;+x&lt;span class="w"&gt; &lt;/span&gt;./src/startup_script.sh
+
+ENTRYPOINT&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;./src/startup_script.sh&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In any project, we first write a Dockerfile, build this file, push the docker image to artifact registry, and then use Kubernetes manifest to pull and install the docker image.&lt;/p&gt;
+&lt;p&gt;I will give an example of building and pushing the Docker image to Artifact registry&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;GCR_URL&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;asia-docker.pkg.dev/gcp-project-name
+&lt;span class="nv"&gt;REGISTRY_URL&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;asia-northeast1-python.pkg.dev
+&lt;span class="nv"&gt;BASE_IMAGE_NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;services/run_training_job
+&lt;span class="nv"&gt;BASE_IMAGE_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;base-0.1
+&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;services/run_training_job
+&lt;span class="nv"&gt;STAGING_IMAGE_TAG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;staging-0.1
+&lt;span class="nv"&gt;PRODUCTION_IMAGE_TAG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;production-0.1
+&lt;span class="nv"&gt;IMAGE_TAG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;PRODUCTION_IMAGE_TAG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="nv"&gt;ENV&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;prod
+
+build_and_push:
+&lt;span class="w"&gt;  &lt;/span&gt;docker-build&lt;span class="w"&gt; &lt;/span&gt;docker-push
+
+docker-build:
+&lt;span class="w"&gt;  &lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;build&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;Dockerfile&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BASE_IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_TAG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--no-cache&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;--build-arg&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;BASE_IMAGE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GCR_URL&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BASE_IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BASE_IMAGE_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;.
+
+docker-push:
+&lt;span class="w"&gt;  &lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;tag&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_TAG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GCR_URL&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_TAG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;gcloud&lt;span class="w"&gt; &lt;/span&gt;auth&lt;span class="w"&gt; &lt;/span&gt;login
+&lt;span class="w"&gt;  &lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;push&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GCR_URL&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_NAME&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;IMAGE_TAG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If we run the following command, it will take care of building and push the image to artifact registry&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;make&lt;span class="w"&gt; &lt;/span&gt;build_and_push
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;build_and_push command is actually executing two other steps, first docker-build and the docker-push&lt;/p&gt;</content><category term="Machine Learning in Production"></category><category term="Machine Learning Operations"></category><category term="Makefile"></category><category term="Docker"></category></entry><entry><title>Asynchronous Programming / Asyncio for Long running tasks without blocking main thread</title><link href="https://www.mdinesh.com/asyncio-non-blocking-main-thread-for-long-running-tasks.html" rel="alternate"></link><published>2021-04-09T00:00:00+05:30</published><updated>2021-04-09T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2021-04-09:/asyncio-non-blocking-main-thread-for-long-running-tasks.html</id><summary type="html">&lt;p&gt;Use asyncio without blocking main thread for running time taking tasks.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Asynchronous programming is a powerful technique that can be used to improve the performance and scalability of Python applications.&lt;/p&gt;
 &lt;p&gt;Lets see how we can use asyncio to wait until a long running task is finished without blocking main thread. This is useful if you are running a very time consuming task wait until a post request completes and we get the status code, or a database query, and so on. Basically we dont want to make our application unresponsive while a task is running.&lt;/p&gt;
 &lt;p&gt;In the example below, I am using easy to understand example of summing two numbers. In reality, we have lot of post/get/update/delete/put requests, and database writes etc. and using these will  complicate the example below.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;asyncio&lt;/span&gt;
@@ -139,7 +223,63 @@ spec:
 
     &lt;span class="c1"&gt;# Return the result of long running task. The await keyword is used to wait for the coroutine to finish executing.&lt;/span&gt;
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="k"&gt;await&lt;/span&gt; &lt;span class="n"&gt;task&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Asynchronous Programming"></category><category term="Distributed Computing"></category><category term="Asynchronous Programming"></category></entry><entry><title>Micro Services / Using 12 factors for microservices in Production</title><link href="https://www.mdinesh.com/micro-services-12-factors.html" rel="alternate"></link><published>2019-05-02T00:00:00+05:30</published><updated>2019-05-02T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2019-05-02:/micro-services-12-factors.html</id><summary type="html">&lt;p&gt;How to handle transient issues in distributed systems and cloud environment.&lt;/p&gt;</summary><content type="html">&lt;p&gt;In our microservices deployment, we release several monolithic applications that interact with each other to achieve a specific goal. The experts at Heroku have formulated a set of 12 fundamental principles tailored for ensuring a successful microservices deployment.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Asynchronous Programming"></category><category term="Distributed Computing"></category><category term="Asynchronous Programming"></category></entry><entry><title>Code Profiling and Memory Profiling in Python: Optimizing Performance and Resource Usage</title><link href="https://www.mdinesh.com/code-profiling-and-memory-profiling.html" rel="alternate"></link><published>2020-02-07T04:30:00+05:30</published><updated>2020-02-07T04:30:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2020-02-07:/code-profiling-and-memory-profiling.html</id><summary type="html">&lt;p&gt;use code profiler and memory profiler&lt;/p&gt;</summary><content type="html">&lt;p&gt;As Python developers, we strive to write efficient and performant code, but understanding where our code spends its time and how it utilizes memory can be a daunting task. This is where profiling comes to the rescue. In this blog post, we'll explore the realms of code profiling and memory profiling in Python, unraveling the mysteries behind optimizing your applications.&lt;/p&gt;
+&lt;h3&gt;Code Profiling:&lt;/h3&gt;
+&lt;p&gt;Code profiling involves analyzing the execution time of different parts of your code to identify bottlenecks and areas for improvement. Python provides a built-in module called cProfile that helps us achieve this.&lt;/p&gt;
+&lt;p&gt;Let's consider a simple example. Imagine you have a script that calculates the sum of squares up to a certain number. In the below code I have intentionally added time.sleep for 0.1 second after every result computation.&lt;/p&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;sum_of_squares&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+        &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;To profile this code:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;cProfile&lt;/span&gt;
+
+&lt;span class="n"&gt;cProfile&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;sum_of_squares(100)&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And here is the result of code profiling:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="c_profile" src="images/../../images/profiling_code/c_profile.png"&gt;&lt;/p&gt;
+&lt;p&gt;In the above image, for each line of code, we can see number of calls, total time elapsed at the specific line, time per call, cumulative time, and percentage of time / call.&lt;/p&gt;
+&lt;p&gt;In the line highlighted in red, we can see the most amunt of time &amp;amp; most amount of calls are spent at time.sleep function&lt;/p&gt;
+&lt;h3&gt;Memory Profiling:&lt;/h3&gt;
+&lt;p&gt;Similarly during memory profiling we analyze the amount of memory that is consumed at each line.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;memory_profiler&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;profile&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;pd&lt;/span&gt;
+
+&lt;span class="nd"&gt;@profile&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;generate_squares&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;squares&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+
+    &lt;span class="n"&gt;sample_df&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DataFrame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;a&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;b&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;squares&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;generate_squares&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In the above code, I am creating a sample_df dataframe using pandas and when I did memory profiling these are the results.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="memory_profiler" src="images/../../images/profiling_code/memory_profiler.png"&gt;&lt;/p&gt;
+&lt;p&gt;We can see that the line where we are creating the sample pandas dataframe is consuming the highest amount of memory.&lt;/p&gt;
+&lt;p&gt;Profiling code and memory can help us in:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mf"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Reducing&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;execution&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;time&lt;/span&gt;
+&lt;span class="mf"&gt;2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Identifying&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;performance&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;bottlenecks&lt;/span&gt;
+&lt;span class="mf"&gt;3&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Detect&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;Prevent&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;of&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;memory&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;errors&lt;/span&gt;
+&lt;span class="mf"&gt;4&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Optimizing&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;memory&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;usage&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Machine Learning in Production"></category><category term="Production"></category><category term="Performance"></category></entry><entry><title>Using 12 factors for microservices in Production</title><link href="https://www.mdinesh.com/micro-services-12-factors.html" rel="alternate"></link><published>2019-05-02T00:00:00+05:30</published><updated>2019-05-02T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2019-05-02:/micro-services-12-factors.html</id><summary type="html">&lt;p&gt;How to handle transient issues in distributed systems and cloud environment.&lt;/p&gt;</summary><content type="html">&lt;p&gt;In our microservices deployment, we release several monolithic applications that interact with each other to achieve a specific goal. The experts at Heroku have formulated a set of 12 fundamental principles tailored for ensuring a successful microservices deployment.&lt;/p&gt;
 &lt;p&gt;1.Codebase: &lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Maintain a single codebase per service.&lt;/p&gt;
@@ -298,7 +438,50 @@ Moreover, If you have the model on top of cloud, it will increase the cost for d
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img alt="circuit_breaker_states" src="images/../../images/retry_pattern/circuit_breaker_states.png"&gt;&lt;/p&gt;</content><category term="Distributed Systems"></category><category term="Distributed Systems"></category><category term="Micro Services"></category><category term="Patterns"></category><category term="Circuit Breaker"></category></entry><entry><title>Distributed Systems / Cloud Patterns - Retry for Transient failures</title><link href="https://www.mdinesh.com/pattern-distributed-cloud-transient-issues-retry.html" rel="alternate"></link><published>2018-08-09T00:00:00+05:30</published><updated>2018-08-09T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2018-08-09:/pattern-distributed-cloud-transient-issues-retry.html</id><summary type="html">&lt;p&gt;How to handle transient issues in distributed systems and cloud environment.&lt;/p&gt;</summary><content type="html">&lt;p&gt;We use retry pattern when dealing a temporary failure(also called transient failure), and retrying will fix the issue.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="circuit_breaker_states" src="images/../../images/retry_pattern/circuit_breaker_states.png"&gt;&lt;/p&gt;</content><category term="Distributed Systems"></category><category term="Distributed Systems"></category><category term="Micro Services"></category><category term="Patterns"></category><category term="Circuit Breaker"></category></entry><entry><title>Region Masking on an Image</title><link href="https://www.mdinesh.com/region-masking-on-an-image.html" rel="alternate"></link><published>2018-08-11T13:15:00+05:30</published><updated>2018-08-11T13:15:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2018-08-11:/region-masking-on-an-image.html</id><summary type="html">&lt;p&gt;Region masking on an image&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Objective:&lt;/h2&gt;
+&lt;p&gt;The objective of region masking is identifying the triangular region infront of the car where the lane lines are falling. &lt;/p&gt;
+&lt;h2&gt;Pen and Paper:&lt;/h2&gt;
+&lt;p&gt;I spent a lot of time understanding/breaking down this concept by using pen and paper because this has little bit of math involved.&lt;/p&gt;
+&lt;p&gt;To understand this concept, lets go through what I did on the paper.&lt;/p&gt;
+&lt;p&gt;Pick some random vertices(left, right, and apex) points which fall inside the size of the image.&lt;/p&gt;
+&lt;p&gt;If you look at the below screenshot, I used&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;left = (0, 400)
+right = (700, 450)
+apex = (370, 0)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then I plotted these vertices on the graph as seen below.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/sdc_udacity/region_masking_triangle_vertices.jpg" alt="Vertices of triangle written on a paper" style="width: 500px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Then I computed slope and intercepts for the following lines&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;left to apex
+apex to right
+left to right
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src="images/sdc_udacity/region_masking_slope_and_intercepts.jpg" alt="Computing slope and intercepts" style="width: 500px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;We got the following Coefficients(slope and intercepts)&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/sdc_udacity/region_masking_slope_and_intercepts_breakup.jpg" alt="Slope and Intercepts in a table" style="width: 500px; height: 200px;"/&gt;&lt;/p&gt;
+&lt;h2&gt;Create a Mesh grid using the height and width of the image&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Note&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;In&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;order&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;understand&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;concept&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;I&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;used&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;very&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;small&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src="images/sdc_udacity/meshgrid_example_with_10_by_10.png" alt="Create a numpy meshgrid with the image of size 10 x 10" style="width: 700px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;See the values of XX, and YY&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/sdc_udacity/meshgrid_XX_and_YY_values.png" alt="Create a numpy meshgrid with the image of size 10 x 10" style="width: 400px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Then we use the slope and intercept to find the region inside the triangle. &lt;/p&gt;
+&lt;p&gt;If you look at the image below, we are finding the regions inside the vertices using slope and intercept and then finding the values where they occur and marking them as Booleans.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/sdc_udacity/region_masking_finding_boundaries.png" alt="Use the slope and intercepts to find the region inside the triangle" style="width: 400px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Note&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;I&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;used&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;example&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;understand&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;concepts&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;described&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;above&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;But&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;when&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;you&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;implement&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;above&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;concepts&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;on&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;an&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;mask&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;triangular&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;region&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;it&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;would&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;look&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;something&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;like&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src="images/sdc_udacity/region_masking_on_an_image_example.png" alt="Region masking example" style="width: 400px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Ofcourse, this is just and example and it is not around the lane lines.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;References&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Find coefficients - slope &amp;amp; intercept - https://www.youtube.com/watch?v=4il4haYASys&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Self Driving Cars"></category><category term="Self Driving Cars"></category><category term="Image"></category><category term="Pen &amp; Paper"></category></entry><entry><title>Distributed Systems / Cloud Patterns - Retry for Transient failures</title><link href="https://www.mdinesh.com/pattern-distributed-cloud-transient-issues-retry.html" rel="alternate"></link><published>2018-08-09T00:00:00+05:30</published><updated>2018-08-09T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2018-08-09:/pattern-distributed-cloud-transient-issues-retry.html</id><summary type="html">&lt;p&gt;How to handle transient issues in distributed systems and cloud environment.&lt;/p&gt;</summary><content type="html">&lt;p&gt;We use retry pattern when dealing a temporary failure(also called transient failure), and retrying will fix the issue.&lt;/p&gt;
 &lt;p&gt;Transient failures are temporary errors that occur in distributed systems. They can be caused by a variety of factors, such as:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Network Problems: can be due to packet loss, routing errors, and timeouts.&lt;/li&gt;
