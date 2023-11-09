@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Dinesh" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Distributed Systems, Micro Services, Patterns, Circuit Breaker, Distributed Systems, " />
+
+<meta property="og:title" content="Distributed Systems / Cloud Patterns - Circuit Breaker for Non-Transient failures "/>
+<meta property="og:url" content="http://localhost:8000/pattern-distributed-cloud-issues-circuit-breaker.html" />
+<meta property="og:description" content="How to hande network issues in distributed systems and cloud environment." />
+<meta property="og:site_name" content="Dinesh&#39;s Journal" />
+<meta property="og:article:author" content="Dinesh" />
+<meta property="og:article:published_time" content="2018-08-21T00:00:00+05:30" />
+<meta property="og:article:modified_time" content="2018-08-21T00:00:00+05:30" />
+<meta name="twitter:title" content="Distributed Systems / Cloud Patterns - Circuit Breaker for Non-Transient failures ">
+<meta name="twitter:description" content="How to hande network issues in distributed systems and cloud environment.">
+
+        <title>Distributed Systems / Cloud Patterns - Circuit Breaker for Non-Transient failures  · Dinesh&#39;s Journal
+</title>
+        <link href="http://localhost:8000//feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dinesh&#39;s Journal - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="http://localhost:8000/"><span class=site-name>Dinesh's Journal</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       http://localhost:8000
+                                    >Home</a>
+                                </li>
+                                <li ><a href="http://localhost:8000/categories.html">Categories</a></li>
+                                <li ><a href="http://localhost:8000/tags.html">Tags</a></li>
+                                <li ><a href="http://localhost:8000/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="http://localhost:8000/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="http://localhost:8000/pattern-distributed-cloud-issues-circuit-breaker.html">
+                Distributed Systems / Cloud Patterns - Circuit Breaker for Non-Transient failures
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>Non-transient(non temporary) failures in distributed systems are issues that usually persist for a very long time, may take longer to recover, and can even make the system unavailable. </p>
+<p>We already discussed about retry pattern in the previous blog post, but retry pattern cannot handle non-transient failures.</p>
+<p>The problem with non-transcient failures is that it can make many services go down when they are dependent on each other.</p>
+<p>For example, look at the below image where Service 3 &amp; 2 requires Service 1 to succeed and Service 4 requires Service 3 to succeed.</p>
+<p>This is deadly and can cause entire system to break down.</p>
+<p><img alt="transcient_failure_causes_dependecy_failures" src="images/../../images/retry_pattern/circuit_breaker_dependency_failure.png"></p>
+<p>It is not just the database that might long time to recover. It can also be that the service that has to respond is hammered with lot of requessts. </p>
+<p>Some common causes of non-transient failures include:</p>
+<ul>
+<li>Network Congestion</li>
+<li>Reboot failures</li>
+<li>Resource blockages/ Exhaustion, when other services are utilizing a service that we might be calling. During this resource exhaustion can happen such as CPU, memory, and storage are not sufficent anymore.</li>
+<li>Outages that last very long</li>
+<li>Dependency failures</li>
+<li>Hardware issues, such as network cable was severed etc. </li>
+</ul>
+<p>It is not advised to keep retrying during non-transient failures, because we put a lot of load on the servers, waste lot of computing resources, and we are just waiting out for the issue to resolve. </p>
+<p>So how do we handle the non-transcient failures?</p>
+<ul>
+<li>We stop requests to the failing server for some time until it recovers.</li>
+</ul>
+<p>Unlike retry pattern, a Circuit Breaker sits in between the client &amp; the server.</p>
+<p><img alt="circuit_breaker_position" src="images/../../images/retry_pattern/circuit_breaker_position.png"></p>
+<p>Circuit breaker will allow the failing component, some time to recover, thereby also conserving resources.</p>
+<p>A Circuit Breaker can be at different types of states:</p>
+<ul>
+<li>Closed circuit:<ul>
+<li>This is the first state of the Circuit breaker where it is closed and it is allowing request to pass from one service to another service, and the communication/response is successful.</li>
+</ul>
+</li>
+<li>Open circuit:<ul>
+<li>This can be the second state of the Circuit breaker where two services are unable to communicate, as in response received is failure. So, the circuit is open disallowing the connection from one service to another.</li>
+</ul>
+</li>
+<li>Half Open circuit:<ul>
+<li>This can be the third state, and occurs only when Open Circuit occurs.</li>
+<li>This state can be used for testing, where a Service sends test request to another service to test the connection and if it is working, then the state goes to Closed circuit state or else, it will remain in the Open circuit state.</li>
+</ul>
+</li>
+</ul>
+<p><img alt="circuit_breaker_states" src="images/../../images/retry_pattern/circuit_breaker_states.png"></p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2018-08-21T00:00:00+05:30">Tue 21 August 2018</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="http://localhost:8000/categories.html#distributed-systems-ref">Distributed Systems</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="http://localhost:8000/tags.html#circuit-breaker-ref">Circuit Breaker
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="http://localhost:8000/tags.html#distributed-systems-ref">Distributed Systems
+                    <span class="superscript">4</span>
+</a></li>
+                <li><a href="http://localhost:8000/tags.html#micro-services-ref">Micro Services
+                    <span class="superscript">5</span>
+</a></li>
+                <li><a href="http://localhost:8000/tags.html#patterns-ref">Patterns
+                    <span class="superscript">2</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="http://localhost:8000/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

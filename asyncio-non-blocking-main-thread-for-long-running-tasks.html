@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Dinesh" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Distributed Computing, Asynchronous Programming, Asynchronous Programming, " />
+
+<meta property="og:title" content="Asynchronous Programming / Asyncio for Long running tasks without blocking main thread "/>
+<meta property="og:url" content="http://localhost:8000/asyncio-non-blocking-main-thread-for-long-running-tasks.html" />
+<meta property="og:description" content="Use asyncio without blocking main thread for running time taking tasks." />
+<meta property="og:site_name" content="Dinesh&#39;s Journal" />
+<meta property="og:article:author" content="Dinesh" />
+<meta property="og:article:published_time" content="2021-04-09T00:00:00+05:30" />
+<meta property="og:article:modified_time" content="2021-04-09T00:00:00+05:30" />
+<meta name="twitter:title" content="Asynchronous Programming / Asyncio for Long running tasks without blocking main thread ">
+<meta name="twitter:description" content="Use asyncio without blocking main thread for running time taking tasks.">
+
+        <title>Asynchronous Programming / Asyncio for Long running tasks without blocking main thread  · Dinesh&#39;s Journal
+</title>
+        <link href="http://localhost:8000//feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dinesh&#39;s Journal - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="http://localhost:8000/"><span class=site-name>Dinesh's Journal</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       http://localhost:8000
+                                    >Home</a>
+                                </li>
+                                <li ><a href="http://localhost:8000/categories.html">Categories</a></li>
+                                <li ><a href="http://localhost:8000/tags.html">Tags</a></li>
+                                <li ><a href="http://localhost:8000/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="http://localhost:8000/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="http://localhost:8000/asyncio-non-blocking-main-thread-for-long-running-tasks.html">
+                Asynchronous Programming / Asyncio for Long running tasks without blocking main thread
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>Asynchronous programming is a powerful technique that can be used to improve the performance and scalability of Python applications.</p>
+<p>Lets see how we can use asyncio to wait until a long running task is finished without blocking main thread. This is useful if you are running a very time consuming task wait until a post request completes and we get the status code, or a database query, and so on. Basically we dont want to make our application unresponsive while a task is running.</p>
+<p>In the example below, I am using easy to understand example of summing two numbers. In reality, we have lot of post/get/update/delete/put requests, and database writes etc. and using these will  complicate the example below.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">long_running_task</span><span class="p">(</span><span class="n">task_status</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum two numbers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">num1</span> <span class="o">+</span> <span class="n">num2</span>
+
+    <span class="c1"># Set the status flag to indicate that the task is completed.</span>
+    <span class="n">task_status</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Returns the sum of two numbers.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">task_status</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+
+  <span class="c1"># Start the long-running task in a separate coroutine.</span>
+  <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">long_running_task</span><span class="p">(</span><span class="n">task_status</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">))</span>
+
+  <span class="c1"># Poll the status of the task in the main thread.</span>
+  <span class="k">while</span> <span class="ow">not</span> <span class="n">task_status</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+    <span class="c1"># Do some other work in the main thread.</span>
+    <span class="c1"># ...</span>
+
+    <span class="c1"># Check the status of the task periodically.</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="c1"># Return the result of long running task.</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="n">task</span>
+
+<span class="c1"># Sum two numbers using asyncio.</span>
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">my_function</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">29</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Lets go through the code and see how it works:</p>
+<p>The long_running_task() function is a coroutine. This means that it can be executed concurrently with other tasks.</p>
+<p>This function is adding two numbers and then sets the task_status event object to indicate that it is finished executing</p>
+<div class="highlight"><pre><span></span><code><span class="k">async</span> <span class="k">def</span> <span class="nf">long_running_task</span><span class="p">(</span><span class="n">task_status</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum two numbers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">num1</span> <span class="o">+</span> <span class="n">num2</span>
+
+    <span class="c1"># Set the status flag to indicate that the task is completed.</span>
+    <span class="n">task_status</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+</code></pre></div>
+
+<p>We are using <b>await</b> below to wait until coroutine finishes and returns the result.</p>
+<p>The <b>is_set()</b> method is a method of the Event class in the asyncio library. It is used to check if the event has been set.</p>
+<p>An event object is a way to signal that something has happened. It can be used to synchronize multiple tasks in an asynchronous program.</p>
+<p>To set an event, you can call the set() method on the event object. To check if an event has been set, you can call the is_set() method on the event object.</p>
+<div class="highlight"><pre><span></span><code><span class="k">async</span> <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the sum of two numbers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Create an event object to track the status of the long_running_task() function.</span>
+    <span class="n">task_status</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+
+    <span class="c1"># Start the long_running_task() function in a separate coroutine. The create_task() function creates a new coroutine and returns a Task object. The Task object can be used to track the status of the coroutine and to wait for it to finish executing.</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">long_running_task</span><span class="p">(</span><span class="n">task_status</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">))</span>
+
+    <span class="c1"># Poll the status of the task in the main thread. The is_set() method on the event object will return True if the event has been set, and False otherwise.</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">task_status</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+      <span class="c1"># Do some other work in the main thread.</span>
+      <span class="c1"># ...</span>
+
+      <span class="c1"># Check the status of the task periodically. The sleep() function suspends the current coroutine for the specified number of seconds.</span>
+      <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="c1"># Return the result of long running task. The await keyword is used to wait for the coroutine to finish executing.</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="n">task</span>
+</code></pre></div>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2021-04-09T00:00:00+05:30">Fri 09 April 2021</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="http://localhost:8000/categories.html#asynchronous-programming-ref">Asynchronous Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="http://localhost:8000/tags.html#asynchronous-programming-ref">Asynchronous Programming
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="http://localhost:8000/tags.html#distributed-computing-ref">Distributed Computing
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="http://localhost:8000/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

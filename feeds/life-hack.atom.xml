@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Life hack</title><link href="http://localhost:8000/" rel="alternate"></link><link href="http://localhost:8000/feeds/life-hack.atom.xml" rel="self"></link><id>http://localhost:8000/</id><updated>2017-06-02T19:30:00+05:30</updated><entry><title>Life hack / Simple hack to find cheap Uber prices with respect to time.</title><link href="http://localhost:8000/uber-cheap-prices.html" rel="alternate"></link><published>2017-06-02T19:30:00+05:30</published><updated>2017-06-02T19:30:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2017-06-02:/uber-cheap-prices.html</id><summary type="html">&lt;p&gt;Hack to find cheap Uber prices.&lt;/p&gt;</summary><content type="html">&lt;p&gt;I used to commute to Office using the company provided cabs but lately it has become a nuisance. Instead of riding on my own, I chose to ride using Uber so that I can spend the free time doing my stuff, like reading my Kindle. I like Uber but I am not OK spending exorbitant prices on regular basis when ever the price is in surge. So, I figured out a simple hack to find the time of the day at which Uber prices are low or "1x" or somewhere near.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://developer.uber.com/"&gt;Enter Uber Developer API&lt;/a&gt;. I used python to query the API to fetch the min price, max price and distance for the trips.
+You just pass in the latitudes and longitudes of source &amp;amp; destination and Ubers sends the data.&lt;/p&gt;
+&lt;p&gt;I pulled the data for 6 days for the following routes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Home to Office.&lt;/li&gt;
+&lt;li&gt;Home to Airport. (just in case)&lt;/li&gt;
+&lt;li&gt;Airport to Home. (just in case)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Insights:&lt;/h3&gt;
+&lt;p&gt;Note:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;All the plots shown below are for max prices.&lt;/li&gt;
+&lt;li&gt;These price trends may vary according to location.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;UberGo:&lt;/h4&gt;
+&lt;p&gt;This visual shows the overall picture of the price trend for uberGo across six days which is difficult to comprehend. But if we look at the picture, 1x prices seems to be around 100+ while the surge prices can go upto 400.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/uber_prices/overall_uber_go.png" alt="Overall uberGo visual from home to office" style="width: 650px; height: 200px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Lets breakup the visual into separate days.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/uber_prices/ubergo_breakup.png" alt="Breakup uberGo visual from home to office" style="width: 650px; height: 900px;"/&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If we look at weekdays, price seems to get high around 8 AM.&lt;/li&gt;
+&lt;li&gt;Saturday's price trend looks strange. There is a huge spike at 5AM followed by continuous ups &amp;amp; downs all over the day.&lt;/li&gt;
+&lt;li&gt;On Sunday, the price seems to be normal till 11 AM to 12 AM followed by ups &amp;amp; downs in prices.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;UberPool:&lt;/h4&gt;
+&lt;p&gt;UberPool should look similar to UberGo but still lets plot and see.&lt;/p&gt;
+&lt;p&gt;This visual shows the overall picture of the price trend for uberPool across six days which is difficult to comprehend, so lets break it up into days. But if we look at the picture, 1x price seem to be around 60/- while surge price can go upto 200/-&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/uber_prices/overall_uber_pool.png" alt="Overall uberPool visual from home to office" style="width: 650px; height: 200px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Overall price trends looks little bit different from UberGo.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/uber_prices/uberpool_breakup.png" alt="Breakup uberGo visual from home to office" style="width: 650px; height: 900px;"/&gt;&lt;/p&gt;
+&lt;p&gt;UberPool seems to be in surge with ups &amp;amp; downs even in early morning. If you observe the weekdays, the price seems to surge exactly at hours, like 6, 7, 8 and seems to go down at hour:30s like 6.30, 7.30. Best time to book the cabs.&lt;/p&gt;</content><category term="Life hack"></category><category term="hacks"></category></entry></feed>

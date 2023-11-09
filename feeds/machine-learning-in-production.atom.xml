@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Machine Learning in Production</title><link href="http://localhost:8000/" rel="alternate"></link><link href="http://localhost:8000/feeds/machine-learning-in-production.atom.xml" rel="self"></link><id>http://localhost:8000/</id><updated>2018-09-06T00:00:00+05:30</updated><entry><title>Production | Machine Learning / Optimizing ML Inference Pipelines with Lazy Loading</title><link href="http://localhost:8000/lazy-loading.html" rel="alternate"></link><published>2018-09-06T00:00:00+05:30</published><updated>2018-09-06T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2018-09-06:/lazy-loading.html</id><summary type="html">&lt;p&gt;How can we use Lazy loading to reduce latency, improve user experience and use resources efficiently&lt;/p&gt;</summary><content type="html">&lt;p&gt;If you have operationalized a Machine Learning or Deep Learning model in Production or on top of cloud and when you have to generate predictions on demand, you would know how important latency is.&lt;/p&gt;
+&lt;p&gt;It is a very bad idea to load a model every time whenever there is a prediction request. 
+Moreover, If you have the model on top of cloud, it will increase the cost for data transfer, and increased latency as well.&lt;/p&gt;
+&lt;p&gt;Lazy Loading is a pattern where, we load the model once, store it in a cache, and load from cache every time a prediction request is generated.&lt;/p&gt;
+&lt;p&gt;Advantage of Lazy Loading:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Reduced costs:&lt;ul&gt;
+&lt;li&gt;If we have to load the model every time we need to generate a prediction, expecially when the model is hosted on cloud, it is really expensive.&lt;/li&gt;
+&lt;li&gt;With lazy loading, we load the model only once which can helps us reduce the cloud bills.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Improved Latency:&lt;ul&gt;
+&lt;li&gt;Since we already have the model ready for inference, it will reduce the time it takes to load the model from an external resource and hence reduces the latency.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Reliability:&lt;ul&gt;
+&lt;li&gt;Sometimes there can be network issues or any other errors which makes the system unreliable. Lazy loading can help us with such issues.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Resouce Cleanup:&lt;ul&gt;
+&lt;li&gt;Since we store the loaded model in a Cache, we can use Cache eviction strategies to cleanup the memory when it is not in use for long time.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This is how it looks when we &lt;u&gt;dont use&lt;/u&gt; lazy loading. We keep sending requests to the Cloud Object storage to retrieve the model repeatedly.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="without_lazy_loading" src="images/../../images/lazy_loading/without_lazy_loading.png"&gt;&lt;/p&gt;
+&lt;p&gt;And this is how it looks when we use lazy loading.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="without_lazy_loading" src="images/../../images/lazy_loading/with_lazy_loading.png"&gt;&lt;/p&gt;
+&lt;p&gt;As you can see from the above image, we are using Cache in between Cloud object storage and our Prediction Inference service to lazy load the model.&lt;/p&gt;</content><category term="Machine Learning in Production"></category><category term="Distributed Systems"></category><category term="Micro Services"></category><category term="Lazy Loading"></category><category term="Latency"></category><category term="Machine Learning Operations"></category></entry></feed>

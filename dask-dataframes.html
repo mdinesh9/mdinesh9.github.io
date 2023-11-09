@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Dinesh" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="dask, Out of Core Computations, " />
+
+<meta property="og:title" content="Out of Core Computation / Dask Dataframe for Out of Core Computations "/>
+<meta property="og:url" content="http://localhost:8000/dask-dataframes.html" />
+<meta property="og:description" content="Dask Dataframes for big data." />
+<meta property="og:site_name" content="Dinesh&#39;s Journal" />
+<meta property="og:article:author" content="Dinesh" />
+<meta property="og:article:published_time" content="2016-10-02T21:27:00+05:30" />
+<meta property="og:article:modified_time" content="2016-10-02T21:27:00+05:30" />
+<meta name="twitter:title" content="Out of Core Computation / Dask Dataframe for Out of Core Computations ">
+<meta name="twitter:description" content="Dask Dataframes for big data.">
+
+        <title>Out of Core Computation / Dask Dataframe for Out of Core Computations  · Dinesh&#39;s Journal
+</title>
+        <link href="http://localhost:8000//feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dinesh&#39;s Journal - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="http://localhost:8000/"><span class=site-name>Dinesh's Journal</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       http://localhost:8000
+                                    >Home</a>
+                                </li>
+                                <li ><a href="http://localhost:8000/categories.html">Categories</a></li>
+                                <li ><a href="http://localhost:8000/tags.html">Tags</a></li>
+                                <li ><a href="http://localhost:8000/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="http://localhost:8000/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="http://localhost:8000/dask-dataframes.html">
+                Out of Core Computation / Dask Dataframe for Out of Core Computations
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>The goal of this post is to explore dask dataframe on high level rather than analysis.</p>
+<p><a href="http://pandas.pydata.org/">Pandas</a> is an in-memory python library for quick data munging, preparation, and analysis. Pandas is my go-to library until the data size fits in the memory.</p>
+<p>I was looking for an out of core python library which can handle large datasets. Dask seems to fit in.
+However Pandas API is huge. All the methods in Pandas are not available in Dask.</p>
+<p>Dask basically provides alternative parallel versions of numpy &amp; pandas dataframes where computations are performed whenever required using task scheduling.(Direct Acyclic Graphs. Graphs are defined as a dictionary of tasks)</p>
+<p>Dask uses blocked algorithms which breaks a large dataset into many small chunks.</p>
+<p>Main parts of dask are:</p>
+<ul>
+<li>dask.array: dask.array is like numpy array.</li>
+<li>dask.dataframe: dask.dataframe is like pandas dataframe which can process large volumes of csv files.</li>
+<li>dask.bag: We can use dask bag for semi structure files like JSON blobs or log files.</li>
+</ul>
+<p>The tasks/computations that we define are called task graph which are executed by the Dask Schedulers in parallel. Dask is built on top of tornadoweb making it asynchronous.</p>
+<p>With the help of single machine scheduler, we can use single machine/laptop to process gigabytes of data using disk instead of RAM.</p>
+<p>In a distributed scheduler, there are three components:</p>
+<ul>
+<li>Client(s)/User(s),</li>
+<li>Worker(s),</li>
+<li>Scheduler.</li>
+</ul>
+<p>Ascynchronous communication happens between the Scheduler and the Client. When the client/user submits the graph, the Scheduler coordinates b/w the Client and the worker(s) to do the work. Multiple users can operate on a single scheduler at a time.</p>
+<p>In this post, we will focus only on dask dataframes.</p>
+<p>Dask breaks dataframes into multiple pandas dataframes, so a single dask dataframe is a logical collection of multiple pandas dataframes.</p>
+<p>We will use New York City taxi trip data to explore the power of dask.</p>
+<p>I downloaded 6 Giga Bytes worth of data <a href="https://github.com/toddwschneider/nyc-taxi-data">using this github repo</a>. Thanks to Todd who maintains this github repo.</p>
+<p><img src="images/dask_dataframes/files.png" alt="Files on my local disk" style="width: 650px; height: 180px;"/></p>
+<p>There are several GB's of taxi data available for download. However, due to bandwidth limitations, I was able to download few GB's.</p>
+<p>If I load 6 GB worth of data using Pandas, Pandas throws this beautiful "MemoryError" which is actually frustating.</p>
+<p>So, lets do it with Dask Dataframe. Dask Dataframe looks almost similar to Pandas.</p>
+<h3>Import Dask dataframe and read all the data</h3>
+<div class="highlight"><pre><span></span><code>import<span class="w"> </span>dask.dataframe<span class="w"> </span>as<span class="w"> </span>dd
+<span class="nv">newyork_trips</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>dd.read_csv<span class="o">(</span><span class="s1">&#39;yellow_tripdata*.csv&#39;</span><span class="o">)</span>
+</code></pre></div>
+
+<h3>Print first 5 rows of the data</h3>
+<div class="highlight"><pre><span></span><code>newyork_trips.head<span class="o">()</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="w">    </span>VendorID<span class="w">    </span>tpep_pickup_datetime
+<span class="m">0</span><span class="w">     </span><span class="m">1</span><span class="w">         </span><span class="m">2016</span>-03-01<span class="w"> </span><span class="m">00</span>:00:00
+<span class="m">1</span><span class="w">     </span><span class="m">1</span><span class="w">         </span><span class="m">2016</span>-03-01<span class="w"> </span><span class="m">00</span>:00:00
+<span class="m">2</span><span class="w">     </span><span class="m">2</span><span class="w">         </span><span class="m">2016</span>-03-01<span class="w"> </span><span class="m">00</span>:00:00
+<span class="m">3</span><span class="w">     </span><span class="m">2</span><span class="w">         </span><span class="m">2016</span>-03-01<span class="w"> </span><span class="m">00</span>:00:00
+<span class="m">4</span><span class="w">     </span><span class="m">2</span><span class="w">         </span><span class="m">2016</span>-03-01<span class="w"> </span><span class="m">00</span>:00:00
+</code></pre></div>
+
+<p>Note: I am not showing all the variables in the above output.</p>
+<h3>Lazy Computation (or) Computations using Direct Acyclic Graph</h3>
+<p>Lazy computation is the term frequently used in the case of Apache Spark. Similar to Apache Spark, Dask uses Direct Acyclic Graph to perform computations only when they required.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">total_passenger_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>newyork_trips<span class="o">[</span><span class="s1">&#39;passenger_count&#39;</span><span class="o">]</span>.sum<span class="o">()</span>
+</code></pre></div>
+
+<p>In the above calculation, nothing is actually computed. This is stored in the dask graph. When we call compute() method, this is computed.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">total_passenger_computed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>total_passenger_count.compute<span class="o">()</span>
+print<span class="o">(</span><span class="s2">&quot;Total Passenger Count is: &quot;</span>,<span class="w"> </span>total_passenger_computed<span class="o">)</span>
+Total<span class="w"> </span>Passenger<span class="w"> </span>Count<span class="w"> </span>is:<span class="w"> </span><span class="m">78198268</span>.0
+</code></pre></div>
+
+<p>The operations in Dask are parellizable. It doesn't support all the methods available in Pandas API yet.</p>
+<h3>Filtering the dataframe</h3>
+<div class="highlight"><pre><span></span><code><span class="nv">trip_dist_min10</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>newyork_trips<span class="o">[</span>newyork_trips<span class="o">[</span><span class="s1">&#39;trip_distance&#39;</span><span class="o">]</span><span class="w"> </span>&lt;<span class="w"> </span><span class="m">10</span><span class="o">]</span>.compute<span class="o">()</span>
+</code></pre></div>
+
+<h3>Groupby</h3>
+<div class="highlight"><pre><span></span><code>newyork_trips.groupby<span class="o">(</span><span class="s1">&#39;tpep_pickup_datetime&#39;</span><span class="o">)[</span><span class="s1">&#39;passenger_count&#39;</span><span class="o">]</span>.sum<span class="o">()</span>.head<span class="o">()</span>
+</code></pre></div>
+
+<p>Now comes the good part:</p>
+<ul>
+<li>Dask dataframe to pandas dataframe</li>
+<li>Pandas dataframe to dask dataframe</li>
+</ul>
+<h3>Dask Dataframe to Pandas Dataframe</h3>
+<p>When we use compute() method, dask dataframe is converted to pandas dataframe</p>
+<div class="highlight"><pre><span></span><code><span class="nv">pandas_df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>newyork_trips<span class="o">[</span>newyork_trips<span class="o">[</span><span class="s1">&#39;trip_distance&#39;</span><span class="o">]</span><span class="w"> </span>&lt;<span class="w"> </span><span class="m">5</span><span class="o">]</span>.compute<span class="o">()</span>
+print<span class="o">(</span><span class="s2">&quot;Type of dataframe is: &quot;</span>,<span class="w"> </span>type<span class="o">(</span>pandas_df<span class="o">))</span>
+pandas.core.frame.DataFrame
+</code></pre></div>
+
+<h3>Pandas Dataframe to Dask Dataframe</h3>
+<div class="highlight"><pre><span></span><code>dd.from_pandas<span class="o">(</span>pandas_df,<span class="w"> </span><span class="nv">npartitions</span><span class="o">=</span><span class="m">2</span><span class="o">)</span>
+</code></pre></div>
+
+<p>Complete list of available operations are listed <a href="http://dask.pydata.org/en/latest/dataframe-api.html">here</a></p>
+<h3>References:</h3>
+<ul>
+<li>http://matthewrocklin.com/slides/dask-scipy-2016.html</li>
+<li>https://www.youtube.com/watch?v=PAGjm4BMKlk</li>
+<li>https://www.continuum.io/blog/developer-blog/dask-institutions</li>
+<li>https://github.com/dask/dask/issues/1122</li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2016-10-02T21:27:00+05:30">Sun 02 October 2016</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="http://localhost:8000/categories.html#out-of-core-computations-ref">Out of Core Computations</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="http://localhost:8000/tags.html#dask-ref">dask
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="http://localhost:8000/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

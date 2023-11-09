@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Dinesh" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Data Engineering, Benchmarking, Data, " />
+
+<meta property="og:title" content="Benchmarking / Benchmarking various Data file formats - csv, h5, pytables(hdf5), npy, npz, joblib "/>
+<meta property="og:url" content="http://localhost:8000/benchmarking-data-file-formats.html" />
+<meta property="og:description" content="Benchmark various data file formats" />
+<meta property="og:site_name" content="Dinesh&#39;s Journal" />
+<meta property="og:article:author" content="Dinesh" />
+<meta property="og:article:published_time" content="2017-03-26T00:00:00+05:30" />
+<meta property="og:article:modified_time" content="2017-03-26T00:00:00+05:30" />
+<meta name="twitter:title" content="Benchmarking / Benchmarking various Data file formats - csv, h5, pytables(hdf5), npy, npz, joblib ">
+<meta name="twitter:description" content="Benchmark various data file formats">
+
+        <title>Benchmarking / Benchmarking various Data file formats - csv, h5, pytables(hdf5), npy, npz, joblib  · Dinesh&#39;s Journal
+</title>
+        <link href="http://localhost:8000//feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dinesh&#39;s Journal - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="http://localhost:8000/"><span class=site-name>Dinesh's Journal</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       http://localhost:8000
+                                    >Home</a>
+                                </li>
+                                <li ><a href="http://localhost:8000/categories.html">Categories</a></li>
+                                <li ><a href="http://localhost:8000/tags.html">Tags</a></li>
+                                <li ><a href="http://localhost:8000/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="http://localhost:8000/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="http://localhost:8000/benchmarking-data-file-formats.html">
+                Benchmarking / Benchmarking various Data file formats - csv, h5, pytables(hdf5), npy, npz, joblib
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>The data processing/feature engineering part is very important and time taking process while developing machine learning models. I usually have several different formats of data(after data processing and feature engineering) for ex: one data file may contain only normalized data, one file containing standardized data, various data files with varying features after performing feature selection. I then apply appropriate machine learning models to each of the file and see the cross validation results. </p>
+<p>Also it is important to note that when we save a file to disk and load it back again, serialization and de-serialization happens which can impact the time.</p>
+<p>So, the time to save the data to the disk, load the file back from the disk, memory used are very important factors that can save a lot of time for us.</p>
+<h3>Data Formats</h3>
+<ul>
+<li>csv</li>
+<li>h5</li>
+<li>pytables(hdf5)</li>
+<li>npy</li>
+<li>npz</li>
+<li>joblib</li>
+<li>Todo: hickle.</li>
+<li>Dropped: pickle(because pickle cannot handle larger data sizes. Based on my experiments pickle format has tipping point around 2 GB).</li>
+</ul>
+<h3>Array Sizes</h3>
+<p>Instead of benchmarking just one size, I used asymptotic analysis approach wherein you measure the size and time of various array sizes.</p>
+<ul>
+<li>100 x 100</li>
+<li>1000 x 1000</li>
+<li>10000 x 10000</li>
+<li>20000 x 20000</li>
+<li>30000 x 30000</li>
+<li>40000 x 40000</li>
+<li>50000 x 50000</li>
+</ul>
+<h3>In Memory Sizes</h3>
+<p>The following table shows the size of in memory size consumed after creation of each array:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Array Size  -</th>
+<th style="text-align: left;">In Memory(MB)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">100 x 100   -</td>
+<td style="text-align: left;">0.08</td>
+</tr>
+<tr>
+<td style="text-align: left;">1000 x 1000 -</td>
+<td style="text-align: left;">8</td>
+</tr>
+<tr>
+<td style="text-align: left;">10000 x 10000 -</td>
+<td style="text-align: left;">800</td>
+</tr>
+<tr>
+<td style="text-align: left;">20000 x 20000 -</td>
+<td style="text-align: left;">3200</td>
+</tr>
+<tr>
+<td style="text-align: left;">30000 x 30000 -</td>
+<td style="text-align: left;">7200</td>
+</tr>
+<tr>
+<td style="text-align: left;">40000 x 40000 -</td>
+<td style="text-align: left;">12800</td>
+</tr>
+<tr>
+<td style="text-align: left;">50000 x 50000 -</td>
+<td style="text-align: left;">20000</td>
+</tr>
+</tbody>
+</table>
+<p>Lets see the same data visually:</p>
+<!-- <img src="images/benchmarking/inmemorysizes.png" alt="In memory sizes of various array sizes" style="width: 500px; height: 300px;"/> -->
+
+<p><img alt="benchmarking_data_file_formats" src="images/../../images/benchmarking_data_formats/inmemorysizes.png"></p>
+<h3>Size on disk (in MB):</h3>
+<ul>
+<li>CSV format consumed the largest size on disk when compared to other data formats.</li>
+<li>CSV format consumes 3x the size of all other formats.</li>
+<li>We can see from the below chart that size of the csv file increases exponentially and way far away from other file formats.</li>
+<li>Surprising point is, except csv, all other file formats consume the same disk space as the memory size.</li>
+</ul>
+<!-- <img src="images/benchmarking/size_on_disk.png" alt="Size on disk" style="width: 500px; height: 300px;"/> -->
+
+<p><img alt="size_on_disk" src="images/../../images/benchmarking_data_formats/size_on_disk.png"></p>
+<h3>Time to save files to disk (in minutes):</h3>
+<ul>
+<li>Overall, h5 and hdf5 take less time to save followed by joblib and npy and then npz.</li>
+<li>CSV again performed the worst.</li>
+<li>On an average, CSV consumes 70x times more than the least time taken by any other file format.</li>
+<li>As you can see from the below visual, CSV performs the worst.</li>
+<li>While other formats take less than a minute to save 50000 x 50000 array, csv takes approximately 23 minutes.</li>
+</ul>
+<!-- <img src="images/benchmarking/time_to_disk.png" alt="Time to save to disk" style="width: 500px; height: 300px;"/> -->
+
+<p><img alt="time_to_disk" src="images/../../images/benchmarking_data_formats/time_to_disk.png"></p>
+<h3>Time to load files from disk (in minutes):</h3>
+<ul>
+<li>Overall npy format performs the best.</li>
+<li>CSV performs the worst.</li>
+<li>On an average, CSV consumes 140x times more than npy format to load the data from the disk.</li>
+<li>As you can see from the below visual, time taken to load the csv across various array sizes increases exponentially where as the other file formats show a linear pattern.</li>
+</ul>
+<!-- <img src="images/benchmarking/load_from_disk.png" alt="Time to save to disk" style="width: 500px; height: 300px;"/> -->
+
+<p><img alt="load_from_disk" src="images/../../images/benchmarking_data_formats/load_from_disk.png"></p>
+<h3>Strange results:</h3>
+<ul>
+<li>During my experiments, I used memory_profiler package to check the memory size after loading each file format. I noticed strange results, sometimes the size in memory of the largest array &lt; smaller array sizes. I have to investigate this part.</li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2017-03-26T00:00:00+05:30">Sun 26 March 2017</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="http://localhost:8000/categories.html#data-ref">Data</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="http://localhost:8000/tags.html#benchmarking-ref">Benchmarking
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="http://localhost:8000/tags.html#data-engineering-ref">Data Engineering
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="http://localhost:8000/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

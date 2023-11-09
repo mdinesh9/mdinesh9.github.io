@@ -1,0 +1,799 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal</title><link href="http://localhost:8000/" rel="alternate"></link><link href="http://localhost:8000/feeds/all.atom.xml" rel="self"></link><id>http://localhost:8000/</id><updated>2023-02-05T00:00:00+05:30</updated><entry><title>Kubernetes / Kubernetes Cron to schedule recurring jobs within Kubernetes Pods</title><link href="http://localhost:8000/kubernetes-cron-jobs.html" rel="alternate"></link><published>2023-02-05T00:00:00+05:30</published><updated>2023-02-05T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2023-02-05:/kubernetes-cron-jobs.html</id><summary type="html">&lt;p&gt;Run cron jobs on Kubernetes&lt;/p&gt;</summary><content type="html">&lt;p&gt;Cron jobs are scheduled tasks that run automatically at specified times or intervals in a production environment, such as regularly backing up a database or sending daily reports, ensuring that important processes occur on time without manual intervention.&lt;/p&gt;
+&lt;p&gt;If you are using Kubernetes to automate the deployment, scaling, and management of containerized applications, Kubernetes Cron can help us take care of scheduling cron jobs to run on pods.&lt;/p&gt;
+&lt;p&gt;Examples of some of the tasks that we might want to do are we can check the status of the pods, update database records, send emails, slack messages and so on.&lt;/p&gt;
+&lt;p&gt;Below is the diagram of how Kubernetes cron works:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It is triggered every day at night 11 PM&lt;/li&gt;
+&lt;li&gt;It downloads the image, deploys a service on a Pod(s) and runs it.&lt;/li&gt;
+&lt;li&gt;The image can have a python script for example which can do anything, like checking the status, or running a workflow tool, and so on, and depending on the action, we can do n number of actions, like saving to a database, retrigger failed service and so on.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="kubernetes_cron_job" src="images/../../images/kubernetes_cron/kubernetes-cron.png"&gt;&lt;/p&gt;
+&lt;p&gt;I usually work with yaml files to setup and run my cluster, and here is how a sample yaml file looks like:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Yaml config:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;apiVersion:&lt;span class="w"&gt; &lt;/span&gt;batch/v1beta1
+kind:&lt;span class="w"&gt; &lt;/span&gt;CronJob&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# it is a Cron Job&lt;/span&gt;
+metadata:
+&lt;span class="w"&gt;  &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;status-cron&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# name of the CronJob&lt;/span&gt;
+spec:
+&lt;span class="w"&gt;  &lt;/span&gt;schedule:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;* * * * *&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# run every minute&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;startingDeadlineSeconds:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# if a job hasn&amp;#39;t starting in this many seconds, skip&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;concurrencyPolicy:&lt;span class="w"&gt; &lt;/span&gt;Allow&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# either allow|forbid|replace&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;successfulJobsHistoryLimit:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# how many completed jobs should be kept&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;failedJobsHistoryLimit:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# how many failed jobs should be kept&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;jobTemplate:
+&lt;span class="w"&gt;    &lt;/span&gt;spec:
+&lt;span class="w"&gt;      &lt;/span&gt;template:
+&lt;span class="w"&gt;        &lt;/span&gt;spec:
+&lt;span class="w"&gt;          &lt;/span&gt;restartPolicy:&lt;span class="w"&gt; &lt;/span&gt;Never
+&lt;span class="w"&gt;          &lt;/span&gt;containers:
+&lt;span class="w"&gt;            &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;status-cron
+&lt;span class="w"&gt;              &lt;/span&gt;image:&lt;span class="w"&gt; &lt;/span&gt;gcr.io/PROJECT_NAME/status-cron:latest
+&lt;span class="w"&gt;              &lt;/span&gt;&lt;span class="c1"&gt;# environment variables for the Pod&lt;/span&gt;
+&lt;span class="w"&gt;              &lt;/span&gt;env:
+&lt;span class="w"&gt;                &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;GCP_PROJECT_ID
+&lt;span class="w"&gt;                  &lt;/span&gt;value:&lt;span class="w"&gt; &lt;/span&gt;PROJECT_NAME
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="c1"&gt;# endpoint to hit by cron job&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;SVC_ENDPOINT2
+&lt;span class="w"&gt;                  &lt;/span&gt;value:&lt;span class="w"&gt; &lt;/span&gt;http://endpoints.default.svc.cluster.local/endpoint
+&lt;span class="w"&gt;                &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;NODE_ENV
+&lt;span class="w"&gt;                  &lt;/span&gt;value:&lt;span class="w"&gt; &lt;/span&gt;prd
+&lt;span class="w"&gt;              &lt;/span&gt;ports:
+&lt;span class="w"&gt;                &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;containerPort:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;80&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Create/Apply Cron job&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;cronjob.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Validate if the job is created&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;cronjob&lt;span class="w"&gt; &lt;/span&gt;status-cron
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Kubernetes"></category><category term="Distributed Systems"></category><category term="Kubernetes"></category><category term="Micro Services"></category><category term="Machine Learning Operations"></category></entry><entry><title>Asynchronous Programming / Asyncio for Long running tasks without blocking main thread</title><link href="http://localhost:8000/asyncio-non-blocking-main-thread-for-long-running-tasks.html" rel="alternate"></link><published>2021-04-09T00:00:00+05:30</published><updated>2021-04-09T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2021-04-09:/asyncio-non-blocking-main-thread-for-long-running-tasks.html</id><summary type="html">&lt;p&gt;Use asyncio without blocking main thread for running time taking tasks.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Asynchronous programming is a powerful technique that can be used to improve the performance and scalability of Python applications.&lt;/p&gt;
+&lt;p&gt;Lets see how we can use asyncio to wait until a long running task is finished without blocking main thread. This is useful if you are running a very time consuming task wait until a post request completes and we get the status code, or a database query, and so on. Basically we dont want to make our application unresponsive while a task is running.&lt;/p&gt;
+&lt;p&gt;In the example below, I am using easy to understand example of summing two numbers. In reality, we have lot of post/get/update/delete/put requests, and database writes etc. and using these will  complicate the example below.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;asyncio&lt;/span&gt;
+
+&lt;span class="k"&gt;async&lt;/span&gt; &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;long_running_task&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;task_status&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num2&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="sd"&gt;    Sum two numbers&lt;/span&gt;
+&lt;span class="sd"&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;num1&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;num2&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Set the status flag to indicate that the task is completed.&lt;/span&gt;
+    &lt;span class="n"&gt;task_status&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;set&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;
+
+&lt;span class="k"&gt;async&lt;/span&gt; &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;start&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;num1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num2&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="sd"&gt;  Returns the sum of two numbers.&lt;/span&gt;
+&lt;span class="sd"&gt;  &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+  &lt;span class="n"&gt;task_status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;asyncio&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Event&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+  &lt;span class="c1"&gt;# Start the long-running task in a separate coroutine.&lt;/span&gt;
+  &lt;span class="n"&gt;task&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;asyncio&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;create_task&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;long_running_task&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;task_status&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+  &lt;span class="c1"&gt;# Poll the status of the task in the main thread.&lt;/span&gt;
+  &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;task_status&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_set&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="c1"&gt;# Do some other work in the main thread.&lt;/span&gt;
+    &lt;span class="c1"&gt;# ...&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Check the status of the task periodically.&lt;/span&gt;
+    &lt;span class="k"&gt;await&lt;/span&gt; &lt;span class="n"&gt;asyncio&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Return the result of long running task.&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="k"&gt;await&lt;/span&gt; &lt;span class="n"&gt;task&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Sum two numbers using asyncio.&lt;/span&gt;
+&lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;await&lt;/span&gt; &lt;span class="n"&gt;my_function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;29&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Lets go through the code and see how it works:&lt;/p&gt;
+&lt;p&gt;The long_running_task() function is a coroutine. This means that it can be executed concurrently with other tasks.&lt;/p&gt;
+&lt;p&gt;This function is adding two numbers and then sets the task_status event object to indicate that it is finished executing&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;async&lt;/span&gt; &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;long_running_task&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;task_status&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num2&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="sd"&gt;    Sum two numbers&lt;/span&gt;
+&lt;span class="sd"&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;num1&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;num2&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Set the status flag to indicate that the task is completed.&lt;/span&gt;
+    &lt;span class="n"&gt;task_status&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;set&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;We are using &lt;b&gt;await&lt;/b&gt; below to wait until coroutine finishes and returns the result.&lt;/p&gt;
+&lt;p&gt;The &lt;b&gt;is_set()&lt;/b&gt; method is a method of the Event class in the asyncio library. It is used to check if the event has been set.&lt;/p&gt;
+&lt;p&gt;An event object is a way to signal that something has happened. It can be used to synchronize multiple tasks in an asynchronous program.&lt;/p&gt;
+&lt;p&gt;To set an event, you can call the set() method on the event object. To check if an event has been set, you can call the is_set() method on the event object.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;async&lt;/span&gt; &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;start&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;num1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num2&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="sd"&gt;    Returns the sum of two numbers.&lt;/span&gt;
+&lt;span class="sd"&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Create an event object to track the status of the long_running_task() function.&lt;/span&gt;
+    &lt;span class="n"&gt;task_status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;asyncio&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Event&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Start the long_running_task() function in a separate coroutine. The create_task() function creates a new coroutine and returns a Task object. The Task object can be used to track the status of the coroutine and to wait for it to finish executing.&lt;/span&gt;
+    &lt;span class="n"&gt;task&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;asyncio&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;create_task&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;long_running_task&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;task_status&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Poll the status of the task in the main thread. The is_set() method on the event object will return True if the event has been set, and False otherwise.&lt;/span&gt;
+    &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;task_status&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_set&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+      &lt;span class="c1"&gt;# Do some other work in the main thread.&lt;/span&gt;
+      &lt;span class="c1"&gt;# ...&lt;/span&gt;
+
+      &lt;span class="c1"&gt;# Check the status of the task periodically. The sleep() function suspends the current coroutine for the specified number of seconds.&lt;/span&gt;
+      &lt;span class="k"&gt;await&lt;/span&gt; &lt;span class="n"&gt;asyncio&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Return the result of long running task. The await keyword is used to wait for the coroutine to finish executing.&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="k"&gt;await&lt;/span&gt; &lt;span class="n"&gt;task&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Asynchronous Programming"></category><category term="Distributed Computing"></category><category term="Asynchronous Programming"></category></entry><entry><title>Micro Services / Using 12 factors for microservices in Production</title><link href="http://localhost:8000/micro-services-12-factors.html" rel="alternate"></link><published>2019-05-02T00:00:00+05:30</published><updated>2019-05-02T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2019-05-02:/micro-services-12-factors.html</id><summary type="html">&lt;p&gt;How to handle transient issues in distributed systems and cloud environment.&lt;/p&gt;</summary><content type="html">&lt;p&gt;In our microservices deployment, we release several monolithic applications that interact with each other to achieve a specific goal. The experts at Heroku have formulated a set of 12 fundamental principles tailored for ensuring a successful microservices deployment.&lt;/p&gt;
+&lt;p&gt;1.Codebase: &lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Maintain a single codebase per service.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Codebase(project) can contain one single repository or multiple repositories&lt;/p&gt;
+&lt;p&gt;Our microservice should have a single codebase for each service tracked using version control, using a version control system, such as Git. This makes it easier to deploy and rollback changes easily to each individual service, and it also makes it easier to collaborate on the development of the microservice when there are changes that need to be made to the code, like a bugfix, feature, migration, and so on.&lt;/p&gt;
+&lt;p&gt;Keeping code for each service in a seperate repo also helps us in preventing entire system to break and find the root cause, and fix the issue much faster.&lt;/p&gt;
+&lt;p&gt;Under each service, we can have multiple deployment environments, such as&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;dev&lt;/li&gt;
+&lt;li&gt;staging&lt;/li&gt;
+&lt;li&gt;production&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;2.Dependencies&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Explicitly declare and isolate dependencies.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Our microservice should explicitly declare and isolate its dependencies meaning for each external dependency, we should keep the version that we used when we were developing the service and those dependencies should be isolated from the rest of the system.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;requests=version_no&lt;/li&gt;
+&lt;li&gt;Flask==version_no&lt;/li&gt;
+&lt;li&gt;--extra-index-url https://download.pytorch.org/whl/cpu&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;And each service should have its own version, like maybe one service requires one version of flask and another service might require another version of flask.&lt;/p&gt;
+&lt;p&gt;If we dont maintain the version numbers, that means, every developer in our project might install a different version, and it might break our codebase, because of issues such as backwards incompatibility etc.&lt;/p&gt;
+&lt;p&gt;3.Configuration&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Store configurations outside the code.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;We should store all the configuration in environment variables, for example .env, or secret manager etc, rather than in the code itself. This makes it easier to deploy the microservice to different environments, and it also makes it easier to change the microservice's configuration without having to deploy a new version of the code.&lt;/p&gt;
+&lt;p&gt;Also this helps us prevent releasing confidential information in repositories or to the public. &lt;/p&gt;
+&lt;p&gt;4.Backing Services&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Treat services like databases as attached resources.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Supporting components and resources that our services depend on, such as databases, message queues, caching systems, and other external services are called backing services which can store data, communicate with other service, or perform specific tasks.&lt;/p&gt;
+&lt;p&gt;Our services act as main actors in our project, and these backing services are crucial because our services depend on these for storing data, or facilitating communication between services.&lt;/p&gt;
+&lt;p&gt;If any of these backing services become unavailable, it can disrupt overall performance. So, ensuring that these backing services are reliable, scalable, and easily accessible is crucial in the world of microservices to keep your applications running smoothly.&lt;/p&gt;
+&lt;p&gt;So, we should be able to point our app to another instance which is running these backing services.&lt;/p&gt;
+&lt;p&gt;5.Build, Release, Run&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Separate build, release, and run stages.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;We should seperate our services into build, release, and run stages. This means that the microservice should be built into a deployable artifact, such as a Docker image. This artifact can then be released to production and run in a variety of environments. This separation of stages makes it easier to automate the deployment and release of the microservice.&lt;/p&gt;
+&lt;p&gt;The build stage is where you take your codebase and turn it into a runnable artifact. This could be a Docker image, or something else. The important thing is that the artifact is self-contained and can be run on any environment without any additional dependencies.&lt;/p&gt;
+&lt;p&gt;The release stage is where you combine your build artifact with the configuration settings that your microservice needs to run. This configuration could include things like database connection strings, API keys, and environment variables. The release stage should also produce a unique identifier for each release. This will help you to track which versions of your microservices are running in production.&lt;/p&gt;
+&lt;p&gt;The run stage is where you actually start and run your microservice. This could be done by deploying it to a container orchestration platform like Kubernetes, or by running it directly on a server.&lt;/p&gt;
+&lt;p&gt;The important thing is that the build, release, and run stages are strictly separated. This means that you should be able to build, release, and run your microservices without making any changes to the codebase. This makes it easier to deploy new versions of your microservices and to roll back to previous versions if necessary.&lt;/p&gt;
+&lt;p&gt;For example, in our Dockerfile, we can have different names for build, release, run etc. and push this to Artifact registry. &lt;/p&gt;
+&lt;p&gt;6.Processes&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Execute the application as stateless processes.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Our microservice should be stateless and should be executed as one or more identical processes. A  microservice should not maintain any state between requests. This makes it easier to scale the microservice horizontally by adding more instances of the process.&lt;/p&gt;
+&lt;p&gt;Everything should be store in an external service, such as database or a cache.&lt;/p&gt;
+&lt;p&gt;7.Port Binding&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Export services via a port and keep it self-contained.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Using port binding expose its services on a specific port. Other microservices can then communicate with the microservice by sending requests to that port. This makes it easy to discover and consume the microservice's services.&lt;/p&gt;
+&lt;p&gt;8.Concurrency&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Scale horizontally by adding processes.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Our microservice should scale horizontally by scaling out its processes to handle more concurrent requests by adding more servers. This makes it easier to handle spikes in traffic and to scale the microservice to meet the needs of a growing.&lt;/p&gt;
+&lt;p&gt;Also this helps us reduce latency and achieve faster response time.&lt;/p&gt;
+&lt;p&gt;9.Disposability&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Maximize robustness with fast startup and graceful shutdown.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;All the services of our microservices should be disposable, meaning that it can be started, stopped, and restarted quickly and efficiently. This is important for microservices because they are often deployed and scaled dynamically.&lt;/p&gt;
+&lt;p&gt;10.Dev/Prod Parity&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Keep development and production environments as similar as possible.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Having deployed same version of aall our services in both Dev and Prod environments will help us test changes/features/bugfixes easier and deploy to production. With the help of CI/CD tools, we can easily achive this.&lt;/p&gt;
+&lt;p&gt;11.Logs&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Treat logs as event streams.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Our microservice should have structured logs that are easy to collect, search, and analyze which can help in debugging and troubleshooting problems with the microservice.&lt;/p&gt;
+&lt;p&gt;12.Admin Processes&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Run admin tasks as one-off processes.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Our microservice should expose administrative interfaces for monitoring and managing the microservice. This is important for troubleshooting problems with the microservice and for scaling the microservice up and down.&lt;/p&gt;
+&lt;p&gt;References:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;https://12factor.net/&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Micro Services"></category><category term="Micro Services"></category></entry><entry><title>Production | Machine Learning / Optimizing ML Inference Pipelines with Lazy Loading</title><link href="http://localhost:8000/lazy-loading.html" rel="alternate"></link><published>2018-09-06T00:00:00+05:30</published><updated>2018-09-06T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2018-09-06:/lazy-loading.html</id><summary type="html">&lt;p&gt;How can we use Lazy loading to reduce latency, improve user experience and use resources efficiently&lt;/p&gt;</summary><content type="html">&lt;p&gt;If you have operationalized a Machine Learning or Deep Learning model in Production or on top of cloud and when you have to generate predictions on demand, you would know how important latency is.&lt;/p&gt;
+&lt;p&gt;It is a very bad idea to load a model every time whenever there is a prediction request. 
+Moreover, If you have the model on top of cloud, it will increase the cost for data transfer, and increased latency as well.&lt;/p&gt;
+&lt;p&gt;Lazy Loading is a pattern where, we load the model once, store it in a cache, and load from cache every time a prediction request is generated.&lt;/p&gt;
+&lt;p&gt;Advantage of Lazy Loading:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Reduced costs:&lt;ul&gt;
+&lt;li&gt;If we have to load the model every time we need to generate a prediction, expecially when the model is hosted on cloud, it is really expensive.&lt;/li&gt;
+&lt;li&gt;With lazy loading, we load the model only once which can helps us reduce the cloud bills.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Improved Latency:&lt;ul&gt;
+&lt;li&gt;Since we already have the model ready for inference, it will reduce the time it takes to load the model from an external resource and hence reduces the latency.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Reliability:&lt;ul&gt;
+&lt;li&gt;Sometimes there can be network issues or any other errors which makes the system unreliable. Lazy loading can help us with such issues.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Resouce Cleanup:&lt;ul&gt;
+&lt;li&gt;Since we store the loaded model in a Cache, we can use Cache eviction strategies to cleanup the memory when it is not in use for long time.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This is how it looks when we &lt;u&gt;dont use&lt;/u&gt; lazy loading. We keep sending requests to the Cloud Object storage to retrieve the model repeatedly.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="without_lazy_loading" src="images/../../images/lazy_loading/without_lazy_loading.png"&gt;&lt;/p&gt;
+&lt;p&gt;And this is how it looks when we use lazy loading.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="without_lazy_loading" src="images/../../images/lazy_loading/with_lazy_loading.png"&gt;&lt;/p&gt;
+&lt;p&gt;As you can see from the above image, we are using Cache in between Cloud object storage and our Prediction Inference service to lazy load the model.&lt;/p&gt;</content><category term="Machine Learning in Production"></category><category term="Distributed Systems"></category><category term="Micro Services"></category><category term="Lazy Loading"></category><category term="Latency"></category><category term="Machine Learning Operations"></category></entry><entry><title>Distributed Systems / Cloud Patterns - Circuit Breaker for Non-Transient failures</title><link href="http://localhost:8000/pattern-distributed-cloud-issues-circuit-breaker.html" rel="alternate"></link><published>2018-08-21T00:00:00+05:30</published><updated>2018-08-21T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2018-08-21:/pattern-distributed-cloud-issues-circuit-breaker.html</id><summary type="html">&lt;p&gt;How to hande network issues in distributed systems and cloud environment.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Non-transient(non temporary) failures in distributed systems are issues that usually persist for a very long time, may take longer to recover, and can even make the system unavailable. &lt;/p&gt;
+&lt;p&gt;We already discussed about retry pattern in the previous blog post, but retry pattern cannot handle non-transient failures.&lt;/p&gt;
+&lt;p&gt;The problem with non-transcient failures is that it can make many services go down when they are dependent on each other.&lt;/p&gt;
+&lt;p&gt;For example, look at the below image where Service 3 &amp;amp; 2 requires Service 1 to succeed and Service 4 requires Service 3 to succeed.&lt;/p&gt;
+&lt;p&gt;This is deadly and can cause entire system to break down.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="transcient_failure_causes_dependecy_failures" src="images/../../images/retry_pattern/circuit_breaker_dependency_failure.png"&gt;&lt;/p&gt;
+&lt;p&gt;It is not just the database that might long time to recover. It can also be that the service that has to respond is hammered with lot of requessts. &lt;/p&gt;
+&lt;p&gt;Some common causes of non-transient failures include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Network Congestion&lt;/li&gt;
+&lt;li&gt;Reboot failures&lt;/li&gt;
+&lt;li&gt;Resource blockages/ Exhaustion, when other services are utilizing a service that we might be calling. During this resource exhaustion can happen such as CPU, memory, and storage are not sufficent anymore.&lt;/li&gt;
+&lt;li&gt;Outages that last very long&lt;/li&gt;
+&lt;li&gt;Dependency failures&lt;/li&gt;
+&lt;li&gt;Hardware issues, such as network cable was severed etc. &lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;It is not advised to keep retrying during non-transient failures, because we put a lot of load on the servers, waste lot of computing resources, and we are just waiting out for the issue to resolve. &lt;/p&gt;
+&lt;p&gt;So how do we handle the non-transcient failures?&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;We stop requests to the failing server for some time until it recovers.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Unlike retry pattern, a Circuit Breaker sits in between the client &amp;amp; the server.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="circuit_breaker_position" src="images/../../images/retry_pattern/circuit_breaker_position.png"&gt;&lt;/p&gt;
+&lt;p&gt;Circuit breaker will allow the failing component, some time to recover, thereby also conserving resources.&lt;/p&gt;
+&lt;p&gt;A Circuit Breaker can be at different types of states:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Closed circuit:&lt;ul&gt;
+&lt;li&gt;This is the first state of the Circuit breaker where it is closed and it is allowing request to pass from one service to another service, and the communication/response is successful.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Open circuit:&lt;ul&gt;
+&lt;li&gt;This can be the second state of the Circuit breaker where two services are unable to communicate, as in response received is failure. So, the circuit is open disallowing the connection from one service to another.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Half Open circuit:&lt;ul&gt;
+&lt;li&gt;This can be the third state, and occurs only when Open Circuit occurs.&lt;/li&gt;
+&lt;li&gt;This state can be used for testing, where a Service sends test request to another service to test the connection and if it is working, then the state goes to Closed circuit state or else, it will remain in the Open circuit state.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="circuit_breaker_states" src="images/../../images/retry_pattern/circuit_breaker_states.png"&gt;&lt;/p&gt;</content><category term="Distributed Systems"></category><category term="Distributed Systems"></category><category term="Micro Services"></category><category term="Patterns"></category><category term="Circuit Breaker"></category></entry><entry><title>Distributed Systems / Cloud Patterns - Retry for Transient failures</title><link href="http://localhost:8000/pattern-distributed-cloud-transient-issues-retry.html" rel="alternate"></link><published>2018-08-09T00:00:00+05:30</published><updated>2018-08-09T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2018-08-09:/pattern-distributed-cloud-transient-issues-retry.html</id><summary type="html">&lt;p&gt;How to handle transient issues in distributed systems and cloud environment.&lt;/p&gt;</summary><content type="html">&lt;p&gt;We use retry pattern when dealing a temporary failure(also called transient failure), and retrying will fix the issue.&lt;/p&gt;
+&lt;p&gt;Transient failures are temporary errors that occur in distributed systems. They can be caused by a variety of factors, such as:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Network Problems: can be due to packet loss, routing errors, and timeouts.&lt;/li&gt;
+&lt;li&gt;Software Failures: due to crashes, memory leaks, and crashes&lt;/li&gt;
+&lt;li&gt;Resource failures: Temporary unavailability of a VM or disk, and Cold start problems in Serverless instances etc.&lt;/li&gt;
+&lt;li&gt;Infrastructure failures: Such as power outages, and hardware issues.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;We should handle transient failures, otherwise, these issues can cause decreased throughput, increased latency, outages, pipeline failures etc.&lt;/p&gt;
+&lt;p&gt;So, our code should be resilient enough to handle transient failures, using various stragegies listed below to overcome transient failures. &lt;/p&gt;
+&lt;p&gt;Retry Strategies:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;retries the naive way&lt;/li&gt;
+&lt;li&gt;retry specific number of times and fail&lt;/li&gt;
+&lt;li&gt;backoff ( sometimes used, after the above fails, )&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- - Logging retry patterns  [TODO] --&gt;
+
+&lt;p&gt;Lets talk in detail about these patterns:&lt;/p&gt;
+&lt;h5&gt;1. Retry:&lt;/h5&gt;
+&lt;p&gt;You keep hammering the server or a service or an API call, until the issue resolves. No delays, no time delays!&lt;/p&gt;
+&lt;p&gt;Examples can be database connections, failed request call between two services etc.&lt;/p&gt;
+&lt;p&gt;Drawing below shows how this works:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="retry_pattern_mlops_logo" src="images/../../images/retry_pattern/retry-pattern-mlops-micro-services.png"&gt;&lt;/p&gt;
+&lt;h5&gt;2. Retry Specific number of times:&lt;/h5&gt;
+&lt;p&gt;We implement this strategy when we dont want to hammer the server. For example, we retry for 4 times and then stop.&lt;/p&gt;
+&lt;p&gt;Drawing below shows how this works:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="retry_pattern_mlops_logo" src="images/../../images/retry_pattern/retry_only_specific_numberoftimes.png"&gt;&lt;/p&gt;
+&lt;h5&gt;3. Retry with Backoff:&lt;/h5&gt;
+&lt;p&gt;We usually use Retry with Backoff, when the previous method fails where we retry for a specific number of times.&lt;/p&gt;
+&lt;p&gt;Whenever you face an issue, you keep retrying, with increased sleep delays.&lt;/p&gt;
+&lt;p&gt;We add increased sleep delays everytime, to reduce the load that we put on the server.&lt;/p&gt;
+&lt;p&gt;Drawing below shows how this works:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="retry_pattern_mlops_logo" src="images/../../images/retry_pattern/retry_with_backoff.png"&gt;&lt;/p&gt;
+&lt;p&gt;In the next blog post, we will discuss about Circuit Breaker pattern, which is a pattern that can be used to handle non-transient failures.&lt;/p&gt;</content><category term="Distributed Systems"></category><category term="Distributed Systems"></category><category term="Micro Services"></category><category term="Patterns"></category><category term="Retry"></category></entry><entry><title>Machine Learning / Predict the Customer segment in Advertising - Top 1% in IndiaHacks Machine Learning Competition</title><link href="http://localhost:8000/customer-segmentation-advertising-indiahacks.html" rel="alternate"></link><published>2017-10-10T13:34:00+05:30</published><updated>2016-10-02T21:27:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2017-10-10:/customer-segmentation-advertising-indiahacks.html</id><summary type="html">&lt;p&gt;Solution to predicting the customer segmentation in Advertising industry.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Indiahacks Machine Learning competition is an All India machine learning competition conducted once in a year. I participated in the qualification round and secured 6th position(out of 6000 participants), which is Top 1%. Only top 60 participants were selected to participate in offline zonal round. However, I was unable to participate in zonal round since I was traveling.&lt;/p&gt;
+&lt;p&gt;Note: Code is not production ready yet, so not sharing it on github. Will share it when I get some free time.&lt;/p&gt;
+&lt;p&gt;The challenge was to predict the segment(pos, neg) based on the given features:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ID: unique identifier variable&lt;/li&gt;
+&lt;li&gt;titles: format “title:watch_time”, titles of the shows watched by the user and watch_time on different titles&lt;/li&gt;
+&lt;li&gt;genres: same format as titles&lt;/li&gt;
+&lt;li&gt;cities: same format as titles&lt;/li&gt;
+&lt;li&gt;tod: total watch time of the user spread across different time of days (24 hours format)&lt;/li&gt;
+&lt;li&gt;dow: total watch time of the user spread across different days of week (7 days format)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Model Pipeline:&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src="images/indiahacks/segment_hotstar_architecture.png" alt="Segment Hotstar Competition Pipeline" style="width: 550px; height: 400px;"/&gt;&lt;/p&gt;
+&lt;h3&gt;Features extracted from text variables:&lt;/h3&gt;
+
+&lt;p&gt;Titles variable: I used word embedding using word2vec, a deep learning technique which maps similar words to context after trying Bag of Words. Word embedding improved my validation score significantly.&lt;/p&gt;
+&lt;p&gt;Tod variable: Several features were extracted from total watch time column out of which I ended up using the following features:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;tod_median_time&lt;/li&gt;
+&lt;li&gt;tod_min_time&lt;/li&gt;
+&lt;li&gt;dow_max_time&lt;/li&gt;
+&lt;li&gt;watch time counts at hours (0 to 23) mapped from t0 to t23&lt;/li&gt;
+&lt;li&gt;tod_start&lt;/li&gt;
+&lt;li&gt;tod_end&lt;/li&gt;
+&lt;li&gt;Days&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Cities variable: Several features were extracted out of which I ended up using the following features:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;cities_min_time&lt;/li&gt;
+&lt;li&gt;cities_count&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Genres variable: Extracted the genres from this column and mapped each genre as a binary feature.&lt;/p&gt;
+&lt;p&gt;Apart from these, I extracted the following features:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;genres_min_time&lt;/li&gt;
+&lt;li&gt;genres_max_time&lt;/li&gt;
+&lt;li&gt;genres_mean_time&lt;/li&gt;
+&lt;li&gt;genres_median_time&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Other text related features which improved by validation score are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;titles length&lt;/li&gt;
+&lt;li&gt;titles count&lt;/li&gt;
+&lt;li&gt;cities strings&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Features extracted from numeric columns:&lt;/h3&gt;
+
+&lt;p&gt;dow variable:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Binary features for each day of the week starting from Monday to Sunday.&lt;/li&gt;
+&lt;li&gt;Watch time spent on each day from Monday to Sunday.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Model Evaluation:&lt;/h3&gt;
+
+&lt;p&gt;I tried several different models which produced the following scores:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="text-align: left;"&gt;Model&lt;/th&gt;
+&lt;th style="text-align: left;"&gt;Score&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Logistic Regression&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.70&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Linear Discriminant Analysis&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.79&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;K Nearest Neighbors&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.59&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;CART&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.55&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;AdaBoost&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.79&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Gradient Boosting&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.80&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Random Forests&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.69&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Extra Trees Regressor&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.70&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;LightGBM(after hyper parameter tuning)&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.822&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Xgboost(after hyper parameter tuning)&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.821&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;I ended up using LightGBM to generate my predictions.&lt;/p&gt;
+&lt;h3&gt;Hyper parameter tuning:&lt;/h3&gt;
+&lt;p&gt;Used hyperopt to automatically find the right hyper parameters which improved my validation score for LightGBM model&lt;/p&gt;
+&lt;p&gt;The competition rewarded contestants who did feature engineering.&lt;/p&gt;
+&lt;h3&gt;Things that I tried which din't work:&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Bag of Words approach.&lt;/li&gt;
+&lt;li&gt;Dimensionality reduction on Word2vec features.&lt;/li&gt;
+&lt;li&gt;Several extracted numerical and text features.&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Machine Learning"></category><category term="Machine Learning"></category><category term="Competitions"></category><category term="Natural Language Processing"></category></entry><entry><title>Machine Learning / Land Cover Classification with 96% F1 Score - European Conference of Machine Learning-PKDD</title><link href="http://localhost:8000/land-cover-classification-european-conference-pkdd.html" rel="alternate"></link><published>2017-07-30T17:17:00+05:30</published><updated>2017-07-30T17:17:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2017-07-30:/land-cover-classification-european-conference-pkdd.html</id><summary type="html">&lt;p&gt;Land Cover Classification with 96% Accuracy.&lt;/p&gt;</summary><content type="html">&lt;p&gt;European Conference of Machine Learning - Principles and Practice of Knowledge Discovery in Databases conducted a &lt;a href="https://sites.google.com/site/dinoienco/tiselc"&gt;Machine Learning competition&lt;/a&gt; where the task was to classify the land cover.&lt;/p&gt;
+&lt;p&gt;Unfortunately, I was unable to submit my prediction data points on time. But I got 96.34 % accuracy which would have been &lt;span style="color:#FF4633"&gt;&lt;b&gt;4th position&lt;/b&gt;&lt;/span&gt; in the competition. Anyways I described my approach below.&lt;/p&gt;
+&lt;p&gt;The classification of land cover was divided into the following multi-class(9 classes) distribution.&lt;/p&gt;
+&lt;!-- &lt;img src="images/landcover_classification/land_cover_classes.png" alt="Classification table" style="width: 350px; height: 300px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="land_cover_classes" src="images/../../images/landcover_classification/land_cover_classes.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="color:#04847E"&gt;Below picture depicts the class distribution.&lt;/span&gt;&lt;/p&gt;
+&lt;!-- &lt;img src="images/landcover_classification/land_cover_photo.png" alt="land cover image" style="width: 450px; height: 300px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="land_cover_photo" src="images/../../images/landcover_classification/land_cover_photo.png"&gt;&lt;/p&gt;
+&lt;h2&gt;My Approach:&lt;/h2&gt;
+
+&lt;p&gt;There were 230 columns which contained -ve &amp;amp; +ve data points representing the land cover.&lt;/p&gt;
+&lt;h3&gt;Outliers Removal:&lt;/h3&gt;
+&lt;p&gt;All the columns had few rows with outliers which were removed.&lt;/p&gt;
+&lt;p&gt;Boxplot depicting outliers in variable col1:&lt;/p&gt;
+&lt;!-- &lt;img src="images/landcover_classification/outlier_sample_shot.png" alt="Classification table" style="width: 250px; height: 200px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="outlier_sample_shot" src="images/../../images/landcover_classification/outlier_sample_shot.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Feature Engineering:&lt;/h3&gt;
+&lt;p&gt;I extracted several features out of which I ended up using the following features after feature selection.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;coord1_col_1_std - Standard deviation of col1 grouped by coord1.&lt;/li&gt;
+&lt;li&gt;coord_diff_1 - coord1 minus coord2 variables.&lt;/li&gt;
+&lt;li&gt;coord_diff_2 - coord2 minus coord1 variables.&lt;/li&gt;
+&lt;li&gt;coords_combined - coord1 + coord2 variables.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Overall, I ended up using 13 features after feature selection.&lt;/p&gt;
+&lt;h3&gt;BoxCox Transformation for Skewed Variables :&lt;/h3&gt;
+
+&lt;p&gt;Most of the variables were highly skewed.&lt;/p&gt;
+&lt;!-- &lt;img src="images/landcover_classification/skewed_variables.png" alt="Classification table" style="width: 250px; height: 200px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="skewed_variables" src="images/../../images/landcover_classification/skewed_variables.png"&gt;&lt;/p&gt;
+&lt;!-- &lt;img src="images/landcover_classification/skewed_pictures.png" alt="Classification table" style="width: 450px; height: 400px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="skewed_pictures" src="images/../../images/landcover_classification/skewed_pictures.png"&gt;&lt;/p&gt;
+&lt;p&gt;I applied box-cox transformation on variables with (+-)ve 0.25 skew.&lt;/p&gt;
+&lt;!-- &lt;img src="images/landcover_classification/unskewed.png" alt="Classification table" style="width: 250px; height: 200px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="unskewed" src="images/../../images/landcover_classification/unskewed.png"&gt;&lt;/p&gt;
+&lt;!-- &lt;img src="images/landcover_classification/unskewed_pictures.png" alt="Classification table" style="width: 450px; height: 400px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="unskewed_pictures" src="images/../../images/landcover_classification/unskewed_pictures.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Standardize data:&lt;/h3&gt;
+&lt;p&gt;I applied Standard Scaling transformation to standardize the data.&lt;/p&gt;
+&lt;h3&gt;Things that I tried which didn't improve Validation score: &lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Polynomial features/ Feature interactions.&lt;/li&gt;
+&lt;li&gt;Mean, standard deviations, medians(Measures of central tendency) grouped by coordinates.&lt;/li&gt;
+&lt;li&gt;Robust Scaling before removing the outliers.&lt;/li&gt;
+&lt;li&gt;Stacking multiple models.&lt;/li&gt;
+&lt;li&gt;Max voting based on multiple models.&lt;/li&gt;
+&lt;li&gt;Dimensionality reduction.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Model Scores:&lt;/h3&gt;
+
+&lt;p&gt;I tried several models which resulted in the following &lt;b&gt;local&lt;/b&gt; validation scores:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="text-align: left;"&gt;Model&lt;/th&gt;
+&lt;th style="text-align: left;"&gt;Validation Score&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;XGboost(Boosting):&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.96&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Linear Regression:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.68&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Passive Aggressive Classifier:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.47&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;SGD Classifier:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.61&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Linear Discriminant Analysis:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.67&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;KNeighbors Classifier:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.88&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Decision Tree Classifier:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.89&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;GaussianNB:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.64&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;BernoulliNB:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.57&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;AdaBoost Classifier:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.50&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Gradient Boosting Classifier:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.89&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Random Forest Classifier:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.93&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;Extra Trees Classifier:&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.95&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Code available at &lt;a href="https://github.com/pushlog/tiselac_competition"&gt;github&lt;/a&gt;&lt;/p&gt;</content><category term="Machine Learning"></category><category term="Machine Learning"></category><category term="Competitions"></category></entry><entry><title>Life hack / Simple hack to find cheap Uber prices with respect to time.</title><link href="http://localhost:8000/uber-cheap-prices.html" rel="alternate"></link><published>2017-06-02T19:30:00+05:30</published><updated>2017-06-02T19:30:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2017-06-02:/uber-cheap-prices.html</id><summary type="html">&lt;p&gt;Hack to find cheap Uber prices.&lt;/p&gt;</summary><content type="html">&lt;p&gt;I used to commute to Office using the company provided cabs but lately it has become a nuisance. Instead of riding on my own, I chose to ride using Uber so that I can spend the free time doing my stuff, like reading my Kindle. I like Uber but I am not OK spending exorbitant prices on regular basis when ever the price is in surge. So, I figured out a simple hack to find the time of the day at which Uber prices are low or "1x" or somewhere near.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://developer.uber.com/"&gt;Enter Uber Developer API&lt;/a&gt;. I used python to query the API to fetch the min price, max price and distance for the trips.
+You just pass in the latitudes and longitudes of source &amp;amp; destination and Ubers sends the data.&lt;/p&gt;
+&lt;p&gt;I pulled the data for 6 days for the following routes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Home to Office.&lt;/li&gt;
+&lt;li&gt;Home to Airport. (just in case)&lt;/li&gt;
+&lt;li&gt;Airport to Home. (just in case)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Insights:&lt;/h3&gt;
+&lt;p&gt;Note:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;All the plots shown below are for max prices.&lt;/li&gt;
+&lt;li&gt;These price trends may vary according to location.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;UberGo:&lt;/h4&gt;
+&lt;p&gt;This visual shows the overall picture of the price trend for uberGo across six days which is difficult to comprehend. But if we look at the picture, 1x prices seems to be around 100+ while the surge prices can go upto 400.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/uber_prices/overall_uber_go.png" alt="Overall uberGo visual from home to office" style="width: 650px; height: 200px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Lets breakup the visual into separate days.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/uber_prices/ubergo_breakup.png" alt="Breakup uberGo visual from home to office" style="width: 650px; height: 900px;"/&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If we look at weekdays, price seems to get high around 8 AM.&lt;/li&gt;
+&lt;li&gt;Saturday's price trend looks strange. There is a huge spike at 5AM followed by continuous ups &amp;amp; downs all over the day.&lt;/li&gt;
+&lt;li&gt;On Sunday, the price seems to be normal till 11 AM to 12 AM followed by ups &amp;amp; downs in prices.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;UberPool:&lt;/h4&gt;
+&lt;p&gt;UberPool should look similar to UberGo but still lets plot and see.&lt;/p&gt;
+&lt;p&gt;This visual shows the overall picture of the price trend for uberPool across six days which is difficult to comprehend, so lets break it up into days. But if we look at the picture, 1x price seem to be around 60/- while surge price can go upto 200/-&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/uber_prices/overall_uber_pool.png" alt="Overall uberPool visual from home to office" style="width: 650px; height: 200px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Overall price trends looks little bit different from UberGo.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/uber_prices/uberpool_breakup.png" alt="Breakup uberGo visual from home to office" style="width: 650px; height: 900px;"/&gt;&lt;/p&gt;
+&lt;p&gt;UberPool seems to be in surge with ups &amp;amp; downs even in early morning. If you observe the weekdays, the price seems to surge exactly at hours, like 6, 7, 8 and seems to go down at hour:30s like 6.30, 7.30. Best time to book the cabs.&lt;/p&gt;</content><category term="Life hack"></category><category term="hacks"></category></entry><entry><title>Benchmarking / Benchmarking various Data file formats - csv, h5, pytables(hdf5), npy, npz, joblib</title><link href="http://localhost:8000/benchmarking-data-file-formats.html" rel="alternate"></link><published>2017-03-26T00:00:00+05:30</published><updated>2017-03-26T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2017-03-26:/benchmarking-data-file-formats.html</id><summary type="html">&lt;p&gt;Benchmark various data file formats&lt;/p&gt;</summary><content type="html">&lt;p&gt;The data processing/feature engineering part is very important and time taking process while developing machine learning models. I usually have several different formats of data(after data processing and feature engineering) for ex: one data file may contain only normalized data, one file containing standardized data, various data files with varying features after performing feature selection. I then apply appropriate machine learning models to each of the file and see the cross validation results. &lt;/p&gt;
+&lt;p&gt;Also it is important to note that when we save a file to disk and load it back again, serialization and de-serialization happens which can impact the time.&lt;/p&gt;
+&lt;p&gt;So, the time to save the data to the disk, load the file back from the disk, memory used are very important factors that can save a lot of time for us.&lt;/p&gt;
+&lt;h3&gt;Data Formats&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;csv&lt;/li&gt;
+&lt;li&gt;h5&lt;/li&gt;
+&lt;li&gt;pytables(hdf5)&lt;/li&gt;
+&lt;li&gt;npy&lt;/li&gt;
+&lt;li&gt;npz&lt;/li&gt;
+&lt;li&gt;joblib&lt;/li&gt;
+&lt;li&gt;Todo: hickle.&lt;/li&gt;
+&lt;li&gt;Dropped: pickle(because pickle cannot handle larger data sizes. Based on my experiments pickle format has tipping point around 2 GB).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Array Sizes&lt;/h3&gt;
+&lt;p&gt;Instead of benchmarking just one size, I used asymptotic analysis approach wherein you measure the size and time of various array sizes.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;100 x 100&lt;/li&gt;
+&lt;li&gt;1000 x 1000&lt;/li&gt;
+&lt;li&gt;10000 x 10000&lt;/li&gt;
+&lt;li&gt;20000 x 20000&lt;/li&gt;
+&lt;li&gt;30000 x 30000&lt;/li&gt;
+&lt;li&gt;40000 x 40000&lt;/li&gt;
+&lt;li&gt;50000 x 50000&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;In Memory Sizes&lt;/h3&gt;
+&lt;p&gt;The following table shows the size of in memory size consumed after creation of each array:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="text-align: left;"&gt;Array Size  -&lt;/th&gt;
+&lt;th style="text-align: left;"&gt;In Memory(MB)&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;100 x 100   -&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.08&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;1000 x 1000 -&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;8&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;10000 x 10000 -&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;800&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;20000 x 20000 -&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;3200&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;30000 x 30000 -&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;7200&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;40000 x 40000 -&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;12800&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;50000 x 50000 -&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;20000&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Lets see the same data visually:&lt;/p&gt;
+&lt;!-- &lt;img src="images/benchmarking/inmemorysizes.png" alt="In memory sizes of various array sizes" style="width: 500px; height: 300px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="benchmarking_data_file_formats" src="images/../../images/benchmarking_data_formats/inmemorysizes.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Size on disk (in MB):&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;CSV format consumed the largest size on disk when compared to other data formats.&lt;/li&gt;
+&lt;li&gt;CSV format consumes 3x the size of all other formats.&lt;/li&gt;
+&lt;li&gt;We can see from the below chart that size of the csv file increases exponentially and way far away from other file formats.&lt;/li&gt;
+&lt;li&gt;Surprising point is, except csv, all other file formats consume the same disk space as the memory size.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- &lt;img src="images/benchmarking/size_on_disk.png" alt="Size on disk" style="width: 500px; height: 300px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="size_on_disk" src="images/../../images/benchmarking_data_formats/size_on_disk.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Time to save files to disk (in minutes):&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Overall, h5 and hdf5 take less time to save followed by joblib and npy and then npz.&lt;/li&gt;
+&lt;li&gt;CSV again performed the worst.&lt;/li&gt;
+&lt;li&gt;On an average, CSV consumes 70x times more than the least time taken by any other file format.&lt;/li&gt;
+&lt;li&gt;As you can see from the below visual, CSV performs the worst.&lt;/li&gt;
+&lt;li&gt;While other formats take less than a minute to save 50000 x 50000 array, csv takes approximately 23 minutes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- &lt;img src="images/benchmarking/time_to_disk.png" alt="Time to save to disk" style="width: 500px; height: 300px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="time_to_disk" src="images/../../images/benchmarking_data_formats/time_to_disk.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Time to load files from disk (in minutes):&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Overall npy format performs the best.&lt;/li&gt;
+&lt;li&gt;CSV performs the worst.&lt;/li&gt;
+&lt;li&gt;On an average, CSV consumes 140x times more than npy format to load the data from the disk.&lt;/li&gt;
+&lt;li&gt;As you can see from the below visual, time taken to load the csv across various array sizes increases exponentially where as the other file formats show a linear pattern.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- &lt;img src="images/benchmarking/load_from_disk.png" alt="Time to save to disk" style="width: 500px; height: 300px;"/&gt; --&gt;
+
+&lt;p&gt;&lt;img alt="load_from_disk" src="images/../../images/benchmarking_data_formats/load_from_disk.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Strange results:&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;During my experiments, I used memory_profiler package to check the memory size after loading each file format. I noticed strange results, sometimes the size in memory of the largest array &amp;lt; smaller array sizes. I have to investigate this part.&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Data"></category><category term="Data Engineering"></category><category term="Benchmarking"></category></entry><entry><title>Out of Core Computation / Dask Dataframe for Out of Core Computations</title><link href="http://localhost:8000/dask-dataframes.html" rel="alternate"></link><published>2016-10-02T21:27:00+05:30</published><updated>2016-10-02T21:27:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2016-10-02:/dask-dataframes.html</id><summary type="html">&lt;p&gt;Dask Dataframes for big data.&lt;/p&gt;</summary><content type="html">&lt;p&gt;The goal of this post is to explore dask dataframe on high level rather than analysis.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://pandas.pydata.org/"&gt;Pandas&lt;/a&gt; is an in-memory python library for quick data munging, preparation, and analysis. Pandas is my go-to library until the data size fits in the memory.&lt;/p&gt;
+&lt;p&gt;I was looking for an out of core python library which can handle large datasets. Dask seems to fit in.
+However Pandas API is huge. All the methods in Pandas are not available in Dask.&lt;/p&gt;
+&lt;p&gt;Dask basically provides alternative parallel versions of numpy &amp;amp; pandas dataframes where computations are performed whenever required using task scheduling.(Direct Acyclic Graphs. Graphs are defined as a dictionary of tasks)&lt;/p&gt;
+&lt;p&gt;Dask uses blocked algorithms which breaks a large dataset into many small chunks.&lt;/p&gt;
+&lt;p&gt;Main parts of dask are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;dask.array: dask.array is like numpy array.&lt;/li&gt;
+&lt;li&gt;dask.dataframe: dask.dataframe is like pandas dataframe which can process large volumes of csv files.&lt;/li&gt;
+&lt;li&gt;dask.bag: We can use dask bag for semi structure files like JSON blobs or log files.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The tasks/computations that we define are called task graph which are executed by the Dask Schedulers in parallel. Dask is built on top of tornadoweb making it asynchronous.&lt;/p&gt;
+&lt;p&gt;With the help of single machine scheduler, we can use single machine/laptop to process gigabytes of data using disk instead of RAM.&lt;/p&gt;
+&lt;p&gt;In a distributed scheduler, there are three components:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Client(s)/User(s),&lt;/li&gt;
+&lt;li&gt;Worker(s),&lt;/li&gt;
+&lt;li&gt;Scheduler.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Ascynchronous communication happens between the Scheduler and the Client. When the client/user submits the graph, the Scheduler coordinates b/w the Client and the worker(s) to do the work. Multiple users can operate on a single scheduler at a time.&lt;/p&gt;
+&lt;p&gt;In this post, we will focus only on dask dataframes.&lt;/p&gt;
+&lt;p&gt;Dask breaks dataframes into multiple pandas dataframes, so a single dask dataframe is a logical collection of multiple pandas dataframes.&lt;/p&gt;
+&lt;p&gt;We will use New York City taxi trip data to explore the power of dask.&lt;/p&gt;
+&lt;p&gt;I downloaded 6 Giga Bytes worth of data &lt;a href="https://github.com/toddwschneider/nyc-taxi-data"&gt;using this github repo&lt;/a&gt;. Thanks to Todd who maintains this github repo.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/dask_dataframes/files.png" alt="Files on my local disk" style="width: 650px; height: 180px;"/&gt;&lt;/p&gt;
+&lt;p&gt;There are several GB's of taxi data available for download. However, due to bandwidth limitations, I was able to download few GB's.&lt;/p&gt;
+&lt;p&gt;If I load 6 GB worth of data using Pandas, Pandas throws this beautiful "MemoryError" which is actually frustating.&lt;/p&gt;
+&lt;p&gt;So, lets do it with Dask Dataframe. Dask Dataframe looks almost similar to Pandas.&lt;/p&gt;
+&lt;h3&gt;Import Dask dataframe and read all the data&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;import&lt;span class="w"&gt; &lt;/span&gt;dask.dataframe&lt;span class="w"&gt; &lt;/span&gt;as&lt;span class="w"&gt; &lt;/span&gt;dd
+&lt;span class="nv"&gt;newyork_trips&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;dd.read_csv&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;yellow_tripdata*.csv&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Print first 5 rows of the data&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;newyork_trips.head&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="w"&gt;    &lt;/span&gt;VendorID&lt;span class="w"&gt;    &lt;/span&gt;tpep_pickup_datetime
+&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;2016&lt;/span&gt;-03-01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00
+&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;2016&lt;/span&gt;-03-01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00
+&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;2016&lt;/span&gt;-03-01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00
+&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;2016&lt;/span&gt;-03-01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00
+&lt;span class="m"&gt;4&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;2016&lt;/span&gt;-03-01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Note: I am not showing all the variables in the above output.&lt;/p&gt;
+&lt;h3&gt;Lazy Computation (or) Computations using Direct Acyclic Graph&lt;/h3&gt;
+&lt;p&gt;Lazy computation is the term frequently used in the case of Apache Spark. Similar to Apache Spark, Dask uses Direct Acyclic Graph to perform computations only when they required.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;total_passenger_count&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;newyork_trips&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;passenger_count&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;.sum&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In the above calculation, nothing is actually computed. This is stored in the dask graph. When we call compute() method, this is computed.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;total_passenger_computed&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;total_passenger_count.compute&lt;span class="o"&gt;()&lt;/span&gt;
+print&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Total Passenger Count is: &amp;quot;&lt;/span&gt;,&lt;span class="w"&gt; &lt;/span&gt;total_passenger_computed&lt;span class="o"&gt;)&lt;/span&gt;
+Total&lt;span class="w"&gt; &lt;/span&gt;Passenger&lt;span class="w"&gt; &lt;/span&gt;Count&lt;span class="w"&gt; &lt;/span&gt;is:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;78198268&lt;/span&gt;.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The operations in Dask are parellizable. It doesn't support all the methods available in Pandas API yet.&lt;/p&gt;
+&lt;h3&gt;Filtering the dataframe&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;trip_dist_min10&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;newyork_trips&lt;span class="o"&gt;[&lt;/span&gt;newyork_trips&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;trip_distance&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;.compute&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Groupby&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;newyork_trips.groupby&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;tpep_pickup_datetime&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;passenger_count&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;.sum&lt;span class="o"&gt;()&lt;/span&gt;.head&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now comes the good part:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Dask dataframe to pandas dataframe&lt;/li&gt;
+&lt;li&gt;Pandas dataframe to dask dataframe&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Dask Dataframe to Pandas Dataframe&lt;/h3&gt;
+&lt;p&gt;When we use compute() method, dask dataframe is converted to pandas dataframe&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;pandas_df&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;newyork_trips&lt;span class="o"&gt;[&lt;/span&gt;newyork_trips&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;trip_distance&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;5&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;.compute&lt;span class="o"&gt;()&lt;/span&gt;
+print&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Type of dataframe is: &amp;quot;&lt;/span&gt;,&lt;span class="w"&gt; &lt;/span&gt;type&lt;span class="o"&gt;(&lt;/span&gt;pandas_df&lt;span class="o"&gt;))&lt;/span&gt;
+pandas.core.frame.DataFrame
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Pandas Dataframe to Dask Dataframe&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;dd.from_pandas&lt;span class="o"&gt;(&lt;/span&gt;pandas_df,&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;npartitions&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Complete list of available operations are listed &lt;a href="http://dask.pydata.org/en/latest/dataframe-api.html"&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;References:&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;http://matthewrocklin.com/slides/dask-scipy-2016.html&lt;/li&gt;
+&lt;li&gt;https://www.youtube.com/watch?v=PAGjm4BMKlk&lt;/li&gt;
+&lt;li&gt;https://www.continuum.io/blog/developer-blog/dask-institutions&lt;/li&gt;
+&lt;li&gt;https://github.com/dask/dask/issues/1122&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Out of Core Computations"></category><category term="dask"></category></entry><entry><title>Machine Learning / Deployed my first IBM Watson powered App.</title><link href="http://localhost:8000/first-ibm-watson-app.html" rel="alternate"></link><published>2015-06-25T00:15:00+05:30</published><updated>2015-06-25T00:15:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2015-06-25:/first-ibm-watson-app.html</id><summary type="html">&lt;p&gt;Deployed my first IBM Watson App&lt;/p&gt;</summary><content type="html">&lt;p&gt;Update: The app is shutdown.&lt;/p&gt;
+&lt;p&gt;Deployed my first IBM Watson powered app. The app is currently available online &lt;a href="http://pushlog-fun-watson.mybluemix.net/"&gt;at&lt;/a&gt; . The app will let us upload images and apply visual recognition. It can identify objects in the images.&lt;/p&gt;
+&lt;p&gt;For ex, in the below image, Watson was able to identify this image as Windmill and describe the objects in the image.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="IBM Watson Visual Recognition example" src="http://localhost:8000/images/ibm_watson/ibm_watson_visual_recognition.png"&gt;&lt;/p&gt;
+&lt;p&gt;This app was built as part of  &lt;a href="http://topcoder.mybluemix.net/"&gt;topcoder challenge&lt;/a&gt;&lt;/p&gt;</content><category term="Visual Recognition-IBM Watson"></category><category term="ibm watson"></category><category term="visual recognition"></category><category term="Competitions"></category></entry></feed>

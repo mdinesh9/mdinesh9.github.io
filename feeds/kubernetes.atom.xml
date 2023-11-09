@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Kubernetes</title><link href="http://localhost:8000/" rel="alternate"></link><link href="http://localhost:8000/feeds/kubernetes.atom.xml" rel="self"></link><id>http://localhost:8000/</id><updated>2023-02-05T00:00:00+05:30</updated><entry><title>Kubernetes / Kubernetes Cron to schedule recurring jobs within Kubernetes Pods</title><link href="http://localhost:8000/kubernetes-cron-jobs.html" rel="alternate"></link><published>2023-02-05T00:00:00+05:30</published><updated>2023-02-05T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2023-02-05:/kubernetes-cron-jobs.html</id><summary type="html">&lt;p&gt;Run cron jobs on Kubernetes&lt;/p&gt;</summary><content type="html">&lt;p&gt;Cron jobs are scheduled tasks that run automatically at specified times or intervals in a production environment, such as regularly backing up a database or sending daily reports, ensuring that important processes occur on time without manual intervention.&lt;/p&gt;
+&lt;p&gt;If you are using Kubernetes to automate the deployment, scaling, and management of containerized applications, Kubernetes Cron can help us take care of scheduling cron jobs to run on pods.&lt;/p&gt;
+&lt;p&gt;Examples of some of the tasks that we might want to do are we can check the status of the pods, update database records, send emails, slack messages and so on.&lt;/p&gt;
+&lt;p&gt;Below is the diagram of how Kubernetes cron works:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It is triggered every day at night 11 PM&lt;/li&gt;
+&lt;li&gt;It downloads the image, deploys a service on a Pod(s) and runs it.&lt;/li&gt;
+&lt;li&gt;The image can have a python script for example which can do anything, like checking the status, or running a workflow tool, and so on, and depending on the action, we can do n number of actions, like saving to a database, retrigger failed service and so on.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="kubernetes_cron_job" src="images/../../images/kubernetes_cron/kubernetes-cron.png"&gt;&lt;/p&gt;
+&lt;p&gt;I usually work with yaml files to setup and run my cluster, and here is how a sample yaml file looks like:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Yaml config:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;apiVersion:&lt;span class="w"&gt; &lt;/span&gt;batch/v1beta1
+kind:&lt;span class="w"&gt; &lt;/span&gt;CronJob&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# it is a Cron Job&lt;/span&gt;
+metadata:
+&lt;span class="w"&gt;  &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;status-cron&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# name of the CronJob&lt;/span&gt;
+spec:
+&lt;span class="w"&gt;  &lt;/span&gt;schedule:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;* * * * *&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# run every minute&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;startingDeadlineSeconds:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# if a job hasn&amp;#39;t starting in this many seconds, skip&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;concurrencyPolicy:&lt;span class="w"&gt; &lt;/span&gt;Allow&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# either allow|forbid|replace&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;successfulJobsHistoryLimit:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# how many completed jobs should be kept&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;failedJobsHistoryLimit:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# how many failed jobs should be kept&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;jobTemplate:
+&lt;span class="w"&gt;    &lt;/span&gt;spec:
+&lt;span class="w"&gt;      &lt;/span&gt;template:
+&lt;span class="w"&gt;        &lt;/span&gt;spec:
+&lt;span class="w"&gt;          &lt;/span&gt;restartPolicy:&lt;span class="w"&gt; &lt;/span&gt;Never
+&lt;span class="w"&gt;          &lt;/span&gt;containers:
+&lt;span class="w"&gt;            &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;status-cron
+&lt;span class="w"&gt;              &lt;/span&gt;image:&lt;span class="w"&gt; &lt;/span&gt;gcr.io/PROJECT_NAME/status-cron:latest
+&lt;span class="w"&gt;              &lt;/span&gt;&lt;span class="c1"&gt;# environment variables for the Pod&lt;/span&gt;
+&lt;span class="w"&gt;              &lt;/span&gt;env:
+&lt;span class="w"&gt;                &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;GCP_PROJECT_ID
+&lt;span class="w"&gt;                  &lt;/span&gt;value:&lt;span class="w"&gt; &lt;/span&gt;PROJECT_NAME
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="c1"&gt;# endpoint to hit by cron job&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;SVC_ENDPOINT2
+&lt;span class="w"&gt;                  &lt;/span&gt;value:&lt;span class="w"&gt; &lt;/span&gt;http://endpoints.default.svc.cluster.local/endpoint
+&lt;span class="w"&gt;                &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;NODE_ENV
+&lt;span class="w"&gt;                  &lt;/span&gt;value:&lt;span class="w"&gt; &lt;/span&gt;prd
+&lt;span class="w"&gt;              &lt;/span&gt;ports:
+&lt;span class="w"&gt;                &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;containerPort:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;80&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Create/Apply Cron job&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;cronjob.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Validate if the job is created&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;cronjob&lt;span class="w"&gt; &lt;/span&gt;status-cron
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Kubernetes"></category><category term="Distributed Systems"></category><category term="Kubernetes"></category><category term="Micro Services"></category><category term="Machine Learning Operations"></category></entry></feed>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Out of Core Computations</title><link href="http://localhost:8000/" rel="alternate"></link><link href="http://localhost:8000/feeds/out-of-core-computations.atom.xml" rel="self"></link><id>http://localhost:8000/</id><updated>2016-10-02T21:27:00+05:30</updated><entry><title>Out of Core Computation / Dask Dataframe for Out of Core Computations</title><link href="http://localhost:8000/dask-dataframes.html" rel="alternate"></link><published>2016-10-02T21:27:00+05:30</published><updated>2016-10-02T21:27:00+05:30</updated><author><name>Dinesh</name></author><id>tag:localhost,2016-10-02:/dask-dataframes.html</id><summary type="html">&lt;p&gt;Dask Dataframes for big data.&lt;/p&gt;</summary><content type="html">&lt;p&gt;The goal of this post is to explore dask dataframe on high level rather than analysis.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://pandas.pydata.org/"&gt;Pandas&lt;/a&gt; is an in-memory python library for quick data munging, preparation, and analysis. Pandas is my go-to library until the data size fits in the memory.&lt;/p&gt;
+&lt;p&gt;I was looking for an out of core python library which can handle large datasets. Dask seems to fit in.
+However Pandas API is huge. All the methods in Pandas are not available in Dask.&lt;/p&gt;
+&lt;p&gt;Dask basically provides alternative parallel versions of numpy &amp;amp; pandas dataframes where computations are performed whenever required using task scheduling.(Direct Acyclic Graphs. Graphs are defined as a dictionary of tasks)&lt;/p&gt;
+&lt;p&gt;Dask uses blocked algorithms which breaks a large dataset into many small chunks.&lt;/p&gt;
+&lt;p&gt;Main parts of dask are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;dask.array: dask.array is like numpy array.&lt;/li&gt;
+&lt;li&gt;dask.dataframe: dask.dataframe is like pandas dataframe which can process large volumes of csv files.&lt;/li&gt;
+&lt;li&gt;dask.bag: We can use dask bag for semi structure files like JSON blobs or log files.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The tasks/computations that we define are called task graph which are executed by the Dask Schedulers in parallel. Dask is built on top of tornadoweb making it asynchronous.&lt;/p&gt;
+&lt;p&gt;With the help of single machine scheduler, we can use single machine/laptop to process gigabytes of data using disk instead of RAM.&lt;/p&gt;
+&lt;p&gt;In a distributed scheduler, there are three components:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Client(s)/User(s),&lt;/li&gt;
+&lt;li&gt;Worker(s),&lt;/li&gt;
+&lt;li&gt;Scheduler.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Ascynchronous communication happens between the Scheduler and the Client. When the client/user submits the graph, the Scheduler coordinates b/w the Client and the worker(s) to do the work. Multiple users can operate on a single scheduler at a time.&lt;/p&gt;
+&lt;p&gt;In this post, we will focus only on dask dataframes.&lt;/p&gt;
+&lt;p&gt;Dask breaks dataframes into multiple pandas dataframes, so a single dask dataframe is a logical collection of multiple pandas dataframes.&lt;/p&gt;
+&lt;p&gt;We will use New York City taxi trip data to explore the power of dask.&lt;/p&gt;
+&lt;p&gt;I downloaded 6 Giga Bytes worth of data &lt;a href="https://github.com/toddwschneider/nyc-taxi-data"&gt;using this github repo&lt;/a&gt;. Thanks to Todd who maintains this github repo.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/dask_dataframes/files.png" alt="Files on my local disk" style="width: 650px; height: 180px;"/&gt;&lt;/p&gt;
+&lt;p&gt;There are several GB's of taxi data available for download. However, due to bandwidth limitations, I was able to download few GB's.&lt;/p&gt;
+&lt;p&gt;If I load 6 GB worth of data using Pandas, Pandas throws this beautiful "MemoryError" which is actually frustating.&lt;/p&gt;
+&lt;p&gt;So, lets do it with Dask Dataframe. Dask Dataframe looks almost similar to Pandas.&lt;/p&gt;
+&lt;h3&gt;Import Dask dataframe and read all the data&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;import&lt;span class="w"&gt; &lt;/span&gt;dask.dataframe&lt;span class="w"&gt; &lt;/span&gt;as&lt;span class="w"&gt; &lt;/span&gt;dd
+&lt;span class="nv"&gt;newyork_trips&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;dd.read_csv&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;yellow_tripdata*.csv&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Print first 5 rows of the data&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;newyork_trips.head&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="w"&gt;    &lt;/span&gt;VendorID&lt;span class="w"&gt;    &lt;/span&gt;tpep_pickup_datetime
+&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;2016&lt;/span&gt;-03-01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00
+&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;2016&lt;/span&gt;-03-01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00
+&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;2016&lt;/span&gt;-03-01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00
+&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;2016&lt;/span&gt;-03-01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00
+&lt;span class="m"&gt;4&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;2016&lt;/span&gt;-03-01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Note: I am not showing all the variables in the above output.&lt;/p&gt;
+&lt;h3&gt;Lazy Computation (or) Computations using Direct Acyclic Graph&lt;/h3&gt;
+&lt;p&gt;Lazy computation is the term frequently used in the case of Apache Spark. Similar to Apache Spark, Dask uses Direct Acyclic Graph to perform computations only when they required.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;total_passenger_count&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;newyork_trips&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;passenger_count&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;.sum&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In the above calculation, nothing is actually computed. This is stored in the dask graph. When we call compute() method, this is computed.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;total_passenger_computed&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;total_passenger_count.compute&lt;span class="o"&gt;()&lt;/span&gt;
+print&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Total Passenger Count is: &amp;quot;&lt;/span&gt;,&lt;span class="w"&gt; &lt;/span&gt;total_passenger_computed&lt;span class="o"&gt;)&lt;/span&gt;
+Total&lt;span class="w"&gt; &lt;/span&gt;Passenger&lt;span class="w"&gt; &lt;/span&gt;Count&lt;span class="w"&gt; &lt;/span&gt;is:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;78198268&lt;/span&gt;.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The operations in Dask are parellizable. It doesn't support all the methods available in Pandas API yet.&lt;/p&gt;
+&lt;h3&gt;Filtering the dataframe&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;trip_dist_min10&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;newyork_trips&lt;span class="o"&gt;[&lt;/span&gt;newyork_trips&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;trip_distance&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;.compute&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Groupby&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;newyork_trips.groupby&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;tpep_pickup_datetime&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;passenger_count&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;.sum&lt;span class="o"&gt;()&lt;/span&gt;.head&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now comes the good part:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Dask dataframe to pandas dataframe&lt;/li&gt;
+&lt;li&gt;Pandas dataframe to dask dataframe&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Dask Dataframe to Pandas Dataframe&lt;/h3&gt;
+&lt;p&gt;When we use compute() method, dask dataframe is converted to pandas dataframe&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;pandas_df&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;newyork_trips&lt;span class="o"&gt;[&lt;/span&gt;newyork_trips&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;trip_distance&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;5&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;.compute&lt;span class="o"&gt;()&lt;/span&gt;
+print&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Type of dataframe is: &amp;quot;&lt;/span&gt;,&lt;span class="w"&gt; &lt;/span&gt;type&lt;span class="o"&gt;(&lt;/span&gt;pandas_df&lt;span class="o"&gt;))&lt;/span&gt;
+pandas.core.frame.DataFrame
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Pandas Dataframe to Dask Dataframe&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;dd.from_pandas&lt;span class="o"&gt;(&lt;/span&gt;pandas_df,&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;npartitions&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Complete list of available operations are listed &lt;a href="http://dask.pydata.org/en/latest/dataframe-api.html"&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;References:&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;http://matthewrocklin.com/slides/dask-scipy-2016.html&lt;/li&gt;
+&lt;li&gt;https://www.youtube.com/watch?v=PAGjm4BMKlk&lt;/li&gt;
+&lt;li&gt;https://www.continuum.io/blog/developer-blog/dask-institutions&lt;/li&gt;
+&lt;li&gt;https://github.com/dask/dask/issues/1122&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Out of Core Computations"></category><category term="dask"></category></entry></feed>
