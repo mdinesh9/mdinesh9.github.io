@@ -1,5 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal</title><link href="https://www.mdinesh.com/" rel="alternate"></link><link href="https://www.mdinesh.com/feeds/all.atom.xml" rel="self"></link><id>https://www.mdinesh.com/</id><updated>2023-02-05T00:00:00+05:30</updated><entry><title>Kubernetes Cron to schedule recurring jobs within Kubernetes Pods</title><link href="https://www.mdinesh.com/kubernetes-cron-jobs.html" rel="alternate"></link><published>2023-02-05T00:00:00+05:30</published><updated>2023-02-05T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2023-02-05:/kubernetes-cron-jobs.html</id><summary type="html">&lt;p&gt;Run cron jobs on Kubernetes&lt;/p&gt;</summary><content type="html">&lt;p&gt;Cron jobs are scheduled tasks that run automatically at specified times or intervals in a production environment, such as regularly backing up a database or sending daily reports, ensuring that important processes occur on time without manual intervention.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal</title><link href="https://www.mdinesh.com/" rel="alternate"></link><link href="https://www.mdinesh.com/feeds/all.atom.xml" rel="self"></link><id>https://www.mdinesh.com/</id><updated>2023-04-05T00:00:00+05:30</updated><entry><title>Train Pretrained LLM on your custom data with OpenAI and LLAMA Index</title><link href="https://www.mdinesh.com/train-pretrained-llm-on-custom-data.html" rel="alternate"></link><published>2023-04-05T00:00:00+05:30</published><updated>2023-04-05T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2023-04-05:/train-pretrained-llm-on-custom-data.html</id><summary type="html">&lt;p&gt;How to train LLM on your custom data&lt;/p&gt;</summary><content type="html">&lt;p&gt;If you have used OpenAI and would like to finetune the model on your own data.&lt;/p&gt;
+&lt;p&gt;Let us setup the environment first&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;pip3&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;openai&lt;/span&gt;
+&lt;span class="n"&gt;pip3&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;llama&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt; 
+&lt;span class="n"&gt;pip3&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;pypdf&lt;/span&gt; 
+&lt;span class="n"&gt;pip3&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;gradio&lt;/span&gt; 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;To train my custom document, in this case, I have downloaded the documment "Getting ROIC right" from EY website, and posted a few questions:&lt;/p&gt;
+&lt;p&gt;Q1: Why is Return on Invested Capital Important?&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Question_1" src="images/../../images/custom_llamaindex_trained_model/Question_Why_is_Return_on_invested_Capital_important.png"&gt;&lt;/p&gt;
+&lt;p&gt;Q2: Can you explain what a liability is? Can you give me a full list in bullet points?&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Question_2" src="images/../../images/custom_llamaindex_trained_model/Question_What_are_liabilities.png"&gt;&lt;/p&gt;
+&lt;p&gt;Q3: Your role is investor and your task is to calculate ROIC. Also give me an example with actual numbers.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Question_2" src="images/../../images/custom_llamaindex_trained_model/Question_with_proper_prompt_calculate_ROIC.png"&gt;&lt;/p&gt;
+&lt;p&gt;Now, lets talk about the code.&lt;/p&gt;
+&lt;p&gt;My folder structure looks like this, and I have copied my pdf in training-data folder&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;training-data
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img alt="Folder_Structure" src="images/../../images/custom_llamaindex_trained_model/folder_structure.png"&gt;&lt;/p&gt;
+&lt;p&gt;In the above image, I have my code in custom_chat.py. There are two other folders created by llama-index, the indexes folder that it built using your pdf content and flagged folder created by gradio.&lt;/p&gt;
+&lt;p&gt;Now the code part:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;llama_index&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;GPTVectorStoreIndex&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;SimpleDirectoryReader&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;LLMPredictor&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ServiceContext&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;StorageContext&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;load_index_from_storage&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;langchain&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;OpenAI&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;gradio&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+
+&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;OPENAI_API_KEY&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;INSERT_KEY_HERE&amp;#39;&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;construct_index&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;directory_path&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="c1"&gt;# set number of output tokens&lt;/span&gt;
+    &lt;span class="n"&gt;num_outputs&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;256&lt;/span&gt;
+
+    &lt;span class="n"&gt;_llm_predictor&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;LLMPredictor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;llm&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;OpenAI&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;temperature&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;model_name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;gpt-3.5-turbo&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;max_tokens&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;num_outputs&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+    &lt;span class="n"&gt;service_context&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ServiceContext&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_defaults&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;llm_predictor&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;_llm_predictor&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;docs&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SimpleDirectoryReader&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;directory_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load_data&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;index&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;GPTVectorStoreIndex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_documents&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;docs&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;service_context&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;service_context&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;#Directory in which the indexes will be stored&lt;/span&gt;
+    &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;storage_context&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;persist&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;persist_dir&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;indexes&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;chatbot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;input_text&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# rebuild storage context&lt;/span&gt;
+    &lt;span class="n"&gt;storage_context&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;StorageContext&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_defaults&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;persist_dir&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;indexes&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;#load indexes from directory using storage_context &lt;/span&gt;
+    &lt;span class="n"&gt;query_engne&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;load_index_from_storage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;storage_context&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;as_query_engine&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;response&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;query_engne&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;query&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;input_text&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;#returning the response&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;
+
+&lt;span class="c1"&gt;#Creating the web UIusing gradio&lt;/span&gt;
+&lt;span class="n"&gt;iface&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;gradio&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Interface&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fn&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;chatbot&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                     &lt;span class="n"&gt;inputs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gradio&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Textbox&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;lines&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;label&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Enter your question here&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+                     &lt;span class="n"&gt;outputs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;text&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                     &lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Custom-trained AI Chatbot&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;#Constructing indexes based on the documents in traininData folder&lt;/span&gt;
+&lt;span class="c1"&gt;#This can be skipped if you have already trained your app and need to re-run it&lt;/span&gt;
+&lt;span class="n"&gt;index&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;construct_index&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;training-data&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;#launching the web UI using gradio&lt;/span&gt;
+&lt;span class="n"&gt;iface&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;launch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;share&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="LLM"></category><category term="LLM"></category></entry><entry><title>Kubernetes Cron to schedule recurring jobs within Kubernetes Pods</title><link href="https://www.mdinesh.com/kubernetes-cron-jobs.html" rel="alternate"></link><published>2023-02-05T00:00:00+05:30</published><updated>2023-02-05T00:00:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2023-02-05:/kubernetes-cron-jobs.html</id><summary type="html">&lt;p&gt;Run cron jobs on Kubernetes&lt;/p&gt;</summary><content type="html">&lt;p&gt;Cron jobs are scheduled tasks that run automatically at specified times or intervals in a production environment, such as regularly backing up a database or sending daily reports, ensuring that important processes occur on time without manual intervention.&lt;/p&gt;
 &lt;p&gt;If you are using Kubernetes to automate the deployment, scaling, and management of containerized applications, Kubernetes Cron can help us take care of scheduling cron jobs to run on pods.&lt;/p&gt;
 &lt;p&gt;Examples of some of the tasks that we might want to do are we can check the status of the pods, update database records, send emails, slack messages and so on.&lt;/p&gt;
 &lt;p&gt;Below is the diagram of how Kubernetes cron works:&lt;/p&gt;
