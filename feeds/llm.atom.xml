@@ -6,8 +6,11 @@
 &lt;p&gt;Unlike traditional databases that store structured data in rows, and columns, Vector Databases are excellent at storing and search high dimensional data in the form of vectors.&lt;/p&gt;
 &lt;p&gt;Example:&lt;/p&gt;
 &lt;p&gt;[0.81, 0.19, 0.58, 0.99, .........]&lt;/p&gt;
+&lt;p&gt;This is how Indexing in Vector DB works. &lt;/p&gt;
 &lt;!-- ![without_lazy_loading](images/../../images/llm_vectordb_comparison/vector_db_how_it_works.jpg) --&gt;
-&lt;p&gt;&lt;img src="images/../../images/llm_vectordb_comparison/vector_db_how_it_works.jpg" alt="land cover image" style="width: 600px; height: 450px;"/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/../../images/llm_vectordb_comparison/vector_db_indexing_how_it_works.jpg" alt="land cover image" style="width: 600px; height: 450px;"/&gt;&lt;/p&gt;
+&lt;p&gt;This is how querying on top of Vector DB works.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/../../images/llm_vectordb_comparison/vector_db_querying_how_it_works.jpg" alt="land cover image" style="width: 600px; height: 450px;"/&gt;&lt;/p&gt;
 &lt;p&gt;This vector representation which we often call as embeddings, is required because AI/ML models understand numbers and we need vector form to train the models.
 This capability is essential for tasks like:&lt;/p&gt;
 &lt;ul&gt;
