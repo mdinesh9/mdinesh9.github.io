@@ -1,5 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Machine Learning in Production</title><link href="https://www.mdinesh.com/" rel="alternate"></link><link href="https://www.mdinesh.com/feeds/machine-learning-in-production.atom.xml" rel="self"></link><id>https://www.mdinesh.com/</id><updated>2022-11-02T04:30:00+05:30</updated><entry><title>Deploying Docker images &amp; Python packages using Makefile</title><link href="https://www.mdinesh.com/deployment-with-makefile.html" rel="alternate"></link><published>2022-11-02T04:30:00+05:30</published><updated>2022-11-02T04:30:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2022-11-02:/deployment-with-makefile.html</id><summary type="html">&lt;p&gt;Using Makefile to build and push Docker images to Registry&lt;/p&gt;</summary><content type="html">&lt;p&gt;Suppose that there are a series of build and push commands that we need to do inorder to build a docker image and push it to artifact registry for example, Makefile can help us run a series of commands in serial order in command line which helps us kind of semi automate this process.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dinesh's Journal - Machine Learning in Production</title><link href="https://www.mdinesh.com/" rel="alternate"></link><link href="https://www.mdinesh.com/feeds/machine-learning-in-production.atom.xml" rel="self"></link><id>https://www.mdinesh.com/</id><updated>2024-12-11T04:30:00+05:30</updated><entry><title>Productionizing LLM models on Cloud</title><link href="https://www.mdinesh.com/productionizing-llm-models-on-cloud.html" rel="alternate"></link><published>2024-12-11T04:30:00+05:30</published><updated>2024-12-11T04:30:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2024-12-11:/productionizing-llm-models-on-cloud.html</id><summary type="html">&lt;p&gt;Productionizing LLM models on Cloud&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I architected, developed and deployed a highly scalable LLM app on top of Azure Cloud. 
+Below is the architecture that I used to deploy the entire pipeline from, consolidating data into azure blob storage, to generate embeddings using Open AI, saving the embeddings in pgVector, and using Open AI to to generate responses on top of Azure App Service.&lt;/p&gt;
+&lt;h5&gt;Feature Pipeline: Ingesting Data into Azure Blob Storage&lt;/h5&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;img src="images/llm_azure_production/feature_pipeline.png" alt="Files on my local disk" style="width: 300px; height: 400px;"/&gt;&lt;/p&gt;
+&lt;p&gt;We may have multiple data sources sometimes where we want to put it at one place where we read the data, chunk, and and index it.&lt;/p&gt;
+&lt;p&gt;Azure blob storage is a powerful storage solution to handle large-scale data needed for fine-tuning LLM models. &lt;/p&gt;
+&lt;p&gt;An added advantage is using detecting events such as addition, deletion, modification of blobs, and we can use these events to trigger other activities, which we will discuss later in this post.&lt;/p&gt;
+&lt;p&gt;In the above feature pipeline, we are gathering data from multiple data sources such as a database, a disk, web, etc, and putting it together, so that we just have one dataset to deal with.&lt;/p&gt;
+&lt;p&gt;From here, we can have a dataloader which reads the data and we can continue with further activies.&lt;/p&gt;
+&lt;p&gt;Depending on how big the RAG pipeline is, we can create multiple buckets which can serve different purposes, or simply to build different indexes, for scaling.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/llm_azure_production/blob_storage_multiple_folders.png" alt="Files on my local disk"  style="width: 500px; height: 450px;"/&gt;&lt;/p&gt;
+&lt;hr/&gt;
+&lt;hr/&gt;
+
+&lt;h5&gt;Index Pipeline: Transforming Data into Searchable Embeddings&lt;/h5&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;img src="images/llm_azure_production/index_pipeline.png" alt="Files on my local disk"  style="width: 700px; height: 600px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Now lets look at the indexing pipeline. This system helps process and store data efficiently, making it easy to search and retrieve data/embeddings from the vector database.&lt;/p&gt;
+&lt;p&gt;This is how the indexing pipeline works:&lt;/p&gt;
+&lt;h6&gt;1. Uploading Files to Azure Blob Storage&lt;/h6&gt;
+&lt;p&gt;Our data is stored in Azure Blob Storage, which holds different files in containers.&lt;/p&gt;
+&lt;p&gt;Whenever a new file is uploaded, an Azure Blob Trigger detects it and starts the pipeline.&lt;/p&gt;
+&lt;p&gt;And we can create an event using the Events section of the particular azure blob storage account.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/llm_azure_production/blob_event_creation.png" alt="Files on my local disk"  style="width: 700px; height: 600px;"/&gt;&lt;/p&gt;
+&lt;p&gt;When we are creating the event, we can select the types of events that we want to the pipeline to get triggered to. 
+For example, in the below, image, we have selected different types of events related blob, and the directory.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/llm_azure_production/blob_event_types.png" alt="Files on my local disk"  style="width: 700px; height: 600px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Once we select the event types, we can select the endpoint type.
+In my case, I want to trigger an azure function, so I selected azure function.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/llm_azure_production/endpint_azure_fn.png" alt="Files on my local disk"  style="width: 500px; height: 300px;"/&gt;&lt;/p&gt;
+&lt;h6&gt;2. Azure Event Grid Sends Notifications&lt;/h6&gt;
+&lt;p&gt;The trigger sends an event to Azure Event Grid, which acts as a messenger to notify other services.&lt;/p&gt;
+&lt;p&gt;This ensures that our system knows when a new file arrives and processes it immediately.&lt;/p&gt;
+&lt;p&gt;We need not setup anything in the case of Azure Event Grid, the event trigger described above takes care of it.&lt;/p&gt;
+&lt;h6&gt;3. Processing with Azure Functions&lt;/h6&gt;
+&lt;p&gt;Azure Functions are basically serverless programs that handle execution, in this case, handle our reading data, chunking, indexing.&lt;/p&gt;
+&lt;p&gt;We need not manage any infra, its basically serverless where we have an interface. We use this interface to paste our python code which basically connects different things on the cloud, and performs a set of activies. &lt;/p&gt;
+&lt;p&gt;These functions read the new file, break it into smaller chunks, and create embeddings (numerical representations of text) using OpenAI’s models.&lt;/p&gt;
+&lt;p&gt;These embeddings help the system understand and search data efficiently.&lt;/p&gt;
+&lt;p&gt;To create a function, head over to Azure Functions, select the type of function. In my case I selecte consumption app, which is a serverless function, with added advantage of automatic scaling.&lt;/p&gt;
+&lt;p&gt;Once you create a Function App, we can create a function by selecting a template, in my case, I selected Blob trigger &lt;/p&gt;
+&lt;p&gt;&lt;img src="images/llm_azure_production/azure_function_creation.png" alt="Files on my local disk"  style="width: 500px; height: 600px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Once I created the function app, I can write code which reads from a blob container or a specific folder inside blob container, and process the indexing pipeline.&lt;/p&gt;
+&lt;p&gt;Here if you look at the indexing pipeline image above, we have three main components:
+  1. Azure Blob Trigger
+  2. Azure Event Grid
+  3. Azure Function&lt;/p&gt;
+&lt;p&gt;Azure blob trigger detects certain types of events that happens, and we create it.
+  Azure Event Grid, subscribes and listens to Azure Blob Trigger, and once it receives a message, it will publish the message to the Azure Function, which helps us trigger the function.&lt;/p&gt;
+&lt;p&gt;If we look at it, the interaction between these three components is working like a Pub/Sub event.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/llm_azure_production/code_trigger_function.png" alt="Files on my local disk"  style="width: 600px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Once the function app is trigger, we can put all the code in one single function app, or make calls to backend APIs depending on the complexity.&lt;/p&gt;
+&lt;h6&gt;4. Storing in a Vector Database&lt;/h6&gt;
+&lt;p&gt;After processing, the embeddings and indexed data are stored in a vector database.&lt;/p&gt;
+&lt;p&gt;This allows fast and intelligent searching of data based on meaning rather than just keywords.&lt;/p&gt;
+&lt;hr/&gt;
+&lt;hr/&gt;
+
+&lt;h5&gt;Query Pipeline: Serving Real-time Requests&lt;/h5&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;img src="images/llm_azure_production/query_pipeline.png" alt="Files on my local disk"  style="width: 600px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;After succesfully indexing our data in the Vector DB, we can serve the end users for their requests.&lt;/p&gt;
+&lt;p&gt;This pipeline basically fetches, and retrieves relevant information using a LLM, such as OpenAI from the vector db, which allows the users to submit queries and get meaningful reponses.&lt;/p&gt;
+&lt;p&gt;The process is described below.&lt;/p&gt;
+&lt;h6&gt;1. User Submits a Query&lt;/h6&gt;
+&lt;p&gt;A user enters a question or search request.&lt;/p&gt;
+&lt;p&gt;This query is sent to an Azure App Service, which runs a FastAPI server to process the request.&lt;/p&gt;
+&lt;h6&gt;2. Processing the Query&lt;/h6&gt;
+&lt;p&gt;The FastAPI server formats the query and forwards it to a prompt template.&lt;/p&gt;
+&lt;p&gt;This template structures the query properly before sending it to OpenAI’s LLM.&lt;/p&gt;
+&lt;h6&gt;3. Fetching Relevant Information&lt;/h6&gt;
+&lt;p&gt;The LLM interacts with the vector database, which stores indexed data.&lt;/p&gt;
+&lt;p&gt;The vector database helps find the most relevant data based on meaning, not just keywords.&lt;/p&gt;
+&lt;h6&gt;4. Generating and Returning a Response&lt;/h6&gt;
+&lt;p&gt;The LLM processes the query and retrieves relevant information from the vector database.&lt;/p&gt;
+&lt;p&gt;It generates a meaningful response and sends it back to the FastAPI server.&lt;/p&gt;
+&lt;p&gt;Finally, the user receives the response in a simple and easy-to-read format.&lt;/p&gt;
+&lt;hr/&gt;
+&lt;hr/&gt;
+
+&lt;h5&gt;Scaling In &amp;amp; Scaling Out:&lt;/h5&gt;
+&lt;p&gt;Depending on the User base, we may have to scale in and scale out of app servers that we are running.&lt;/p&gt;
+&lt;p&gt;Azure App Service which runs our servers, automatically can handle scale in to server to large user base based on demand and scale out, to save costs.&lt;/p&gt;
+&lt;p&gt;To understand this, lets look at below images:&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/llm_azure_production/scaling_out.png" alt="Files on my local disk"  style="width: 600px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Scale out is basically adding more resources.&lt;/p&gt;
+&lt;p&gt;When the User demand is high, we can add more servers, also called horizontal scaling, which gives us more CPU, more memory, disk space, and so on.&lt;/p&gt;
+&lt;p&gt;Here the requests are sent to the Load Balancer which takes care of routing requests to various servers.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/llm_azure_production/scaling_in.png" alt="Files on my local disk"  style="width: 600px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Scale in is basically removing the resources to save cost when they are not required.&lt;/p&gt;
+&lt;p&gt;We can use this feature under Setting under our app. For example I created an app service. I have highlighted the features in red box below.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/llm_azure_production/scaling_main_window.png" alt="Files on my local disk"  style="width: 400px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;p&gt;Once we select scaling, we can see the list of options provided by Azure App Service, we just click and upgrade. It will take care of scaling in and out automatically.&lt;/p&gt;
+&lt;p&gt;&lt;img src="images/llm_azure_production/scaling_option.png" alt="Files on my local disk"  style="width: 400px; height: 500px;"/&gt;&lt;/p&gt;
+&lt;hr/&gt;
+&lt;hr/&gt;
+
+&lt;h5&gt;FallBack API:&lt;/h5&gt;
+&lt;p&gt;There are always server/API related failures, so it is important to have a fallback API. For example, we can use OpenAI API as the primary API, and use Azure Open AI API as fallback in case of failure, or vice versa.&lt;/p&gt;</content><category term="Machine Learning in Production"></category><category term="Production"></category><category term="Performance"></category><category term="LLMs"></category></entry><entry><title>Deploying Docker images &amp; Python packages using Makefile</title><link href="https://www.mdinesh.com/deployment-with-makefile.html" rel="alternate"></link><published>2022-11-02T04:30:00+05:30</published><updated>2022-11-02T04:30:00+05:30</updated><author><name>Dinesh</name></author><id>tag:www.mdinesh.com,2022-11-02:/deployment-with-makefile.html</id><summary type="html">&lt;p&gt;Using Makefile to build and push Docker images to Registry&lt;/p&gt;</summary><content type="html">&lt;p&gt;Suppose that there are a series of build and push commands that we need to do inorder to build a docker image and push it to artifact registry for example, Makefile can help us run a series of commands in serial order in command line which helps us kind of semi automate this process.&lt;/p&gt;
 &lt;p&gt;For example:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;FROM&lt;span class="w"&gt; &lt;/span&gt;python:3.10
 

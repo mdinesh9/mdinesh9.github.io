@@ -15,19 +15,19 @@
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary">
 
-<meta name="keywords" content="Production, Performance, Machine Learning in Production, " />
+<meta name="keywords" content="Production, Performance, LLMs, Machine Learning in Production, " />
 
-<meta property="og:title" content="Code Profiling and Memory Profiling in Python: Optimizing Performance and Resource Usage "/>
-<meta property="og:url" content="https://www.mdinesh.com/code-profiling-and-memory-profiling.html" />
+<meta property="og:title" content="Productionizing LLM models on Cloud "/>
+<meta property="og:url" content="https://www.mdinesh.com/Productionizing LLM models on Cloud.html" />
 <meta property="og:description" content="use code profiler and memory profiler" />
 <meta property="og:site_name" content="Dinesh&#39;s Journal" />
 <meta property="og:article:author" content="Dinesh" />
-<meta property="og:article:published_time" content="2020-02-07T04:30:00+05:30" />
-<meta property="og:article:modified_time" content="2020-02-07T04:30:00+05:30" />
-<meta name="twitter:title" content="Code Profiling and Memory Profiling in Python: Optimizing Performance and Resource Usage ">
+<meta property="og:article:published_time" content="2024-12-11T04:30:00+05:30" />
+<meta property="og:article:modified_time" content="2024-12-11T04:30:00+05:30" />
+<meta name="twitter:title" content="Productionizing LLM models on Cloud ">
 <meta name="twitter:description" content="use code profiler and memory profiler">
 
-        <title>Code Profiling and Memory Profiling in Python: Optimizing Performance and Resource Usage  · Dinesh&#39;s Journal
+        <title>Productionizing LLM models on Cloud  · Dinesh&#39;s Journal
 </title>
         <link href="https://www.mdinesh.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dinesh&#39;s Journal - Full Atom Feed" />
 
@@ -69,8 +69,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://www.mdinesh.com/code-profiling-and-memory-profiling.html">
-                Code Profiling and Memory Profiling in Python: Optimizing Performance and Resource Usage
+            <a href="https://www.mdinesh.com/Productionizing LLM models on Cloud.html">
+                Productionizing LLM models on Cloud
             </a>
         </h1>
     </header>
@@ -79,63 +79,39 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p>As Python developers, we strive to write efficient and performant code, but understanding where our code spends its time and how it utilizes memory can be a daunting task. This is where profiling comes to the rescue. In this blog post, we'll explore the realms of code profiling and memory profiling in Python, unraveling the mysteries behind optimizing your applications.</p>
-<h3>Code Profiling:</h3>
-<p>Code profiling involves analyzing the execution time of different parts of your code to identify bottlenecks and areas for improvement. Python provides a built-in module called cProfile that helps us achieve this.</p>
-<p>Let's consider a simple example. Imagine you have a script that calculates the sum of squares up to a certain number. In the below code I have intentionally added time.sleep for 0.1 second after every result computation.</p>
-<p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">time</span>
-
-<span class="k">def</span> <span class="nf">sum_of_squares</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">+=</span> <span class="n">i</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">result</span>
-</code></pre></div>
-
-<p>To profile this code:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">cProfile</span>
-
-<span class="n">cProfile</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s1">&#39;sum_of_squares(100)&#39;</span><span class="p">)</span>
-</code></pre></div>
-
-<p>And here is the result of code profiling:</p>
-<p><img alt="c_profile" src="images/../../images/profiling_code/c_profile.png"></p>
-<p>In the above image, for each line of code, we can see number of calls, total time elapsed at the specific line, time per call, cumulative time, and percentage of time / call.</p>
-<p>In the line highlighted in red, we can see the most amunt of time &amp; most amount of calls are spent at time.sleep function</p>
-<h3>Memory Profiling:</h3>
-<p>Similarly during memory profiling we analyze the amount of memory that is consumed at each line.</p>
-<p>For example:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">profile</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-
-<span class="nd">@profile</span>
-<span class="k">def</span> <span class="nf">generate_squares</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-    <span class="n">squares</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
-
-    <span class="n">sample_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
-        <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
-    <span class="p">}</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">squares</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">generate_squares</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
-</code></pre></div>
-
-<p>In the above code, I am creating a sample_df dataframe using pandas and when I did memory profiling these are the results.</p>
-<p><img alt="memory_profiler" src="images/../../images/profiling_code/memory_profiler.png"></p>
-<p>We can see that the line where we are creating the sample pandas dataframe is consuming the highest amount of memory.</p>
-<p>Profiling code and memory can help us in:</p>
-<div class="highlight"><pre><span></span><code><span class="mf">1</span><span class="w"> </span><span class="n">Reducing</span><span class="w"> </span><span class="n">execution</span><span class="w"> </span><span class="n">time</span>
-<span class="mf">2</span><span class="w"> </span><span class="n">Identifying</span><span class="w"> </span><span class="n">performance</span><span class="w"> </span><span class="n">bottlenecks</span>
-<span class="mf">3</span><span class="w"> </span><span class="n">Detect</span><span class="o">/</span><span class="n">Prevent</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">memory</span><span class="w"> </span><span class="n">errors</span>
-<span class="mf">4</span><span class="w"> </span><span class="n">Optimizing</span><span class="w"> </span><span class="n">memory</span><span class="w"> </span><span class="n">usage</span>
-</code></pre></div>
+            <h1>Steps:</h1>
+<ul>
+<li>Create an Azure subscription</li>
+</ul>
+<h1>Setup</h1>
+<ul>
+<li>Azure CLI</li>
+<li>Docker </li>
+</ul>
+<h1>Azure:</h1>
+<ul>
+<li>[TODO]: Look at Azure Hierarchy screenshot</li>
+<li>Subscription<ul>
+<li>Logical container where cloud services, resources, and billings are managed</li>
+</ul>
+</li>
+<li>Resource Groups:<ul>
+<li>Logical containers that group services for a project/application</li>
+</ul>
+</li>
+</ul>
+<p>Tools:
+  - azure sdk 
+  - azure function core tools
+  - pip install azure-functions</p>
+<p>Commands:
+  - Azure function tools
+    - func 
+      - func new --template "EventGridTrigger"</p>
+<p>Azure Functions, is a serverless computing service which can run code without managing infrastructure fro our end and it can be triggered by different azure events, such as events detected in Blob storage. </p>
+<p>Azure Blob Trigger, can trigger code(azure function), on event like Create, delete, modification a blob</p>
+<p>Azure Event Grid, is a fully managed event routing service which utilizes the publish/subscribe pattern, and in our case, we can detect when a blob is detected or modified on azure blob storage, and send a message about this event to azure blob trigger.
+Here, Azure Event Grid, subscribes to Azure Blob Trigger, and publishes it to Azure Function, which then will run the indexing pipeline.</p>
 
 
              
@@ -154,12 +130,15 @@
         </div>
         <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2020-02-07T04:30:00+05:30">Fri 07 February 2020</time>
+            <time itemprop="dateCreated" datetime="2024-12-11T04:30:00+05:30">Wed 11 December 2024</time>
 
             <h4>Category</h4>
             <a class="category-link" href="https://www.mdinesh.com/categories.html#machine-learning-in-production-ref">Machine Learning in Production</a>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
+                <li><a href="https://www.mdinesh.com/tags.html#llms-ref">LLMs
+                    <span class="superscript">1</span>
+</a></li>
                 <li><a href="https://www.mdinesh.com/tags.html#performance-ref">Performance
                     <span class="superscript">2</span>
 </a></li>

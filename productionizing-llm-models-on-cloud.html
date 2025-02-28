@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://www.mdinesh.com/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://www.mdinesh.com/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Dinesh" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Production, Performance, LLMs, Machine Learning in Production, " />
+
+<meta property="og:title" content="Productionizing LLM models on Cloud "/>
+<meta property="og:url" content="https://www.mdinesh.com/productionizing-llm-models-on-cloud.html" />
+<meta property="og:description" content="Productionizing LLM models on Cloud" />
+<meta property="og:site_name" content="Dinesh&#39;s Journal" />
+<meta property="og:article:author" content="Dinesh" />
+<meta property="og:article:published_time" content="2024-12-11T04:30:00+05:30" />
+<meta property="og:article:modified_time" content="2024-12-11T04:30:00+05:30" />
+<meta name="twitter:title" content="Productionizing LLM models on Cloud ">
+<meta name="twitter:description" content="Productionizing LLM models on Cloud">
+
+        <title>Productionizing LLM models on Cloud  · Dinesh&#39;s Journal
+</title>
+        <link href="https://www.mdinesh.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dinesh&#39;s Journal - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://www.mdinesh.com/"><span class=site-name>Dinesh's Journal</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://www.mdinesh.com
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://www.mdinesh.com/categories.html">Categories</a></li>
+                                <li ><a href="https://www.mdinesh.com/tags.html">Tags</a></li>
+                                <li ><a href="https://www.mdinesh.com/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://www.mdinesh.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://www.mdinesh.com/productionizing-llm-models-on-cloud.html">
+                Productionizing LLM models on Cloud
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>Recently I architected, developed and deployed a highly scalable LLM app on top of Azure Cloud. 
+Below is the architecture that I used to deploy the entire pipeline from, consolidating data into azure blob storage, to generate embeddings using Open AI, saving the embeddings in pgVector, and using Open AI to to generate responses on top of Azure App Service.</p>
+<h5>Feature Pipeline: Ingesting Data into Azure Blob Storage</h5>
+<p><br>
+<img src="images/llm_azure_production/feature_pipeline.png" alt="Files on my local disk" style="width: 300px; height: 400px;"/></p>
+<p>We may have multiple data sources sometimes where we want to put it at one place where we read the data, chunk, and and index it.</p>
+<p>Azure blob storage is a powerful storage solution to handle large-scale data needed for fine-tuning LLM models. </p>
+<p>An added advantage is using detecting events such as addition, deletion, modification of blobs, and we can use these events to trigger other activities, which we will discuss later in this post.</p>
+<p>In the above feature pipeline, we are gathering data from multiple data sources such as a database, a disk, web, etc, and putting it together, so that we just have one dataset to deal with.</p>
+<p>From here, we can have a dataloader which reads the data and we can continue with further activies.</p>
+<p>Depending on how big the RAG pipeline is, we can create multiple buckets which can serve different purposes, or simply to build different indexes, for scaling.</p>
+<p><img src="images/llm_azure_production/blob_storage_multiple_folders.png" alt="Files on my local disk"  style="width: 500px; height: 450px;"/></p>
+<hr/>
+<hr/>
+
+<h5>Index Pipeline: Transforming Data into Searchable Embeddings</h5>
+<p><br>
+<img src="images/llm_azure_production/index_pipeline.png" alt="Files on my local disk"  style="width: 700px; height: 600px;"/></p>
+<p>Now lets look at the indexing pipeline. This system helps process and store data efficiently, making it easy to search and retrieve data/embeddings from the vector database.</p>
+<p>This is how the indexing pipeline works:</p>
+<h6>1. Uploading Files to Azure Blob Storage</h6>
+<p>Our data is stored in Azure Blob Storage, which holds different files in containers.</p>
+<p>Whenever a new file is uploaded, an Azure Blob Trigger detects it and starts the pipeline.</p>
+<p>And we can create an event using the Events section of the particular azure blob storage account.</p>
+<p><img src="images/llm_azure_production/blob_event_creation.png" alt="Files on my local disk"  style="width: 700px; height: 600px;"/></p>
+<p>When we are creating the event, we can select the types of events that we want to the pipeline to get triggered to. 
+For example, in the below, image, we have selected different types of events related blob, and the directory.</p>
+<p><img src="images/llm_azure_production/blob_event_types.png" alt="Files on my local disk"  style="width: 700px; height: 600px;"/></p>
+<p>Once we select the event types, we can select the endpoint type.
+In my case, I want to trigger an azure function, so I selected azure function.</p>
+<p><img src="images/llm_azure_production/endpint_azure_fn.png" alt="Files on my local disk"  style="width: 500px; height: 300px;"/></p>
+<h6>2. Azure Event Grid Sends Notifications</h6>
+<p>The trigger sends an event to Azure Event Grid, which acts as a messenger to notify other services.</p>
+<p>This ensures that our system knows when a new file arrives and processes it immediately.</p>
+<p>We need not setup anything in the case of Azure Event Grid, the event trigger described above takes care of it.</p>
+<h6>3. Processing with Azure Functions</h6>
+<p>Azure Functions are basically serverless programs that handle execution, in this case, handle our reading data, chunking, indexing.</p>
+<p>We need not manage any infra, its basically serverless where we have an interface. We use this interface to paste our python code which basically connects different things on the cloud, and performs a set of activies. </p>
+<p>These functions read the new file, break it into smaller chunks, and create embeddings (numerical representations of text) using OpenAI’s models.</p>
+<p>These embeddings help the system understand and search data efficiently.</p>
+<p>To create a function, head over to Azure Functions, select the type of function. In my case I selecte consumption app, which is a serverless function, with added advantage of automatic scaling.</p>
+<p>Once you create a Function App, we can create a function by selecting a template, in my case, I selected Blob trigger </p>
+<p><img src="images/llm_azure_production/azure_function_creation.png" alt="Files on my local disk"  style="width: 500px; height: 600px;"/></p>
+<p>Once I created the function app, I can write code which reads from a blob container or a specific folder inside blob container, and process the indexing pipeline.</p>
+<p>Here if you look at the indexing pipeline image above, we have three main components:
+  1. Azure Blob Trigger
+  2. Azure Event Grid
+  3. Azure Function</p>
+<p>Azure blob trigger detects certain types of events that happens, and we create it.
+  Azure Event Grid, subscribes and listens to Azure Blob Trigger, and once it receives a message, it will publish the message to the Azure Function, which helps us trigger the function.</p>
+<p>If we look at it, the interaction between these three components is working like a Pub/Sub event.</p>
+<p><img src="images/llm_azure_production/code_trigger_function.png" alt="Files on my local disk"  style="width: 600px; height: 500px;"/></p>
+<p>Once the function app is trigger, we can put all the code in one single function app, or make calls to backend APIs depending on the complexity.</p>
+<h6>4. Storing in a Vector Database</h6>
+<p>After processing, the embeddings and indexed data are stored in a vector database.</p>
+<p>This allows fast and intelligent searching of data based on meaning rather than just keywords.</p>
+<hr/>
+<hr/>
+
+<h5>Query Pipeline: Serving Real-time Requests</h5>
+<p><br>
+<img src="images/llm_azure_production/query_pipeline.png" alt="Files on my local disk"  style="width: 600px; height: 500px;"/></p>
+<p>After succesfully indexing our data in the Vector DB, we can serve the end users for their requests.</p>
+<p>This pipeline basically fetches, and retrieves relevant information using a LLM, such as OpenAI from the vector db, which allows the users to submit queries and get meaningful reponses.</p>
+<p>The process is described below.</p>
+<h6>1. User Submits a Query</h6>
+<p>A user enters a question or search request.</p>
+<p>This query is sent to an Azure App Service, which runs a FastAPI server to process the request.</p>
+<h6>2. Processing the Query</h6>
+<p>The FastAPI server formats the query and forwards it to a prompt template.</p>
+<p>This template structures the query properly before sending it to OpenAI’s LLM.</p>
+<h6>3. Fetching Relevant Information</h6>
+<p>The LLM interacts with the vector database, which stores indexed data.</p>
+<p>The vector database helps find the most relevant data based on meaning, not just keywords.</p>
+<h6>4. Generating and Returning a Response</h6>
+<p>The LLM processes the query and retrieves relevant information from the vector database.</p>
+<p>It generates a meaningful response and sends it back to the FastAPI server.</p>
+<p>Finally, the user receives the response in a simple and easy-to-read format.</p>
+<hr/>
+<hr/>
+
+<h5>Scaling In &amp; Scaling Out:</h5>
+<p>Depending on the User base, we may have to scale in and scale out of app servers that we are running.</p>
+<p>Azure App Service which runs our servers, automatically can handle scale in to server to large user base based on demand and scale out, to save costs.</p>
+<p>To understand this, lets look at below images:</p>
+<p><img src="images/llm_azure_production/scaling_out.png" alt="Files on my local disk"  style="width: 600px; height: 500px;"/></p>
+<p>Scale out is basically adding more resources.</p>
+<p>When the User demand is high, we can add more servers, also called horizontal scaling, which gives us more CPU, more memory, disk space, and so on.</p>
+<p>Here the requests are sent to the Load Balancer which takes care of routing requests to various servers.</p>
+<p><img src="images/llm_azure_production/scaling_in.png" alt="Files on my local disk"  style="width: 600px; height: 500px;"/></p>
+<p>Scale in is basically removing the resources to save cost when they are not required.</p>
+<p>We can use this feature under Setting under our app. For example I created an app service. I have highlighted the features in red box below.</p>
+<p><img src="images/llm_azure_production/scaling_main_window.png" alt="Files on my local disk"  style="width: 400px; height: 500px;"/></p>
+<p>Once we select scaling, we can see the list of options provided by Azure App Service, we just click and upgrade. It will take care of scaling in and out automatically.</p>
+<p><img src="images/llm_azure_production/scaling_option.png" alt="Files on my local disk"  style="width: 400px; height: 500px;"/></p>
+<hr/>
+<hr/>
+
+<h5>FallBack API:</h5>
+<p>There are always server/API related failures, so it is important to have a fallback API. For example, we can use OpenAI API as the primary API, and use Azure Open AI API as fallback in case of failure, or vice versa.</p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+    <h4>Reading Time</h4>
+    <p>~5 min read</p>
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2024-12-11T04:30:00+05:30">Wed 11 December 2024</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="https://www.mdinesh.com/categories.html#machine-learning-in-production-ref">Machine Learning in Production</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://www.mdinesh.com/tags.html#llms-ref">LLMs
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://www.mdinesh.com/tags.html#performance-ref">Performance
+                    <span class="superscript">2</span>
+</a></li>
+                <li><a href="https://www.mdinesh.com/tags.html#production-ref">Production
+                    <span class="superscript">2</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://www.mdinesh.com/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+<!--  -->    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

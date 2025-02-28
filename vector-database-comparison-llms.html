@@ -79,7 +79,21 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p>We know the increasing importance of handling high-dimensional data, particularly NLP, and LLM applications. </p>
+            <style>
+  table {
+    border-collapse:collapse; 
+    table-layout:fixed; 
+    width:310px;
+    font-size: 11px;
+  }
+  table td {
+    border:solid 1px #fab; 
+    width:100px; 
+    word-wrap:break-word;
+  }
+  </style>
+
+<p>We know the increasing importance of handling high-dimensional data, particularly NLP, and LLM applications. </p>
 <p>I have recently spent considerable amount of time: researching and comparious various vector databases for our Gen AI based projects. </p>
 <h4>Understanding the Need for Vector Databases:</h4>
 <p>I think it is crucial to understand the why vector databases are gaining traction ofver RDBMS or NoSQL for specific purposes.</p>
@@ -111,154 +125,139 @@ This capability is essential for tasks like:</p>
 Depending on your usecase, please choose the right one. </p>
 <p>For example, if you want a verticaly scalable, low latency DB, you can choose Pinecone or Qdrant. If you want to do vector search using SQL, choose PGVector. </p>
 <table>
-<thead>
-<tr>
-<th>Vector DB</th>
-<th>When to Use</th>
-<th>Scalability</th>
-<th>OpenSource/Enterprise</th>
-<th>Functionality</th>
-<th>Performance</th>
-<th>Type</th>
-<th>Suitable<br>For</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>FAISS</td>
-<td>Efficient for Large datasets</td>
-<td>NA</td>
-<td>Opensource</td>
-<td>GPU availability</td>
-<td>?</td>
-<td>Vector Search</td>
-<td>Offline evaluations/POCs.<br><br>Not suitable for Production</td>
-</tr>
-<tr>
-<td>Milvus</td>
-<td>1. Supports massive vector search<br>2. Auto Index Management<br>3. GPU availability</td>
-<td>Horizontal</td>
-<td>Opensource</td>
-<td>11 Index,<br>Multi Vector Query,<br>Attribute Filtering,<br>GPU, ..</td>
-<td>Low latency</td>
-<td>Purpose built Vector DB</td>
-<td>Large Data Volume<br>and Scalable</td>
-</tr>
-<tr>
-<td>Chroma</td>
-<td>Multimodal data</td>
-<td>NA</td>
-<td>Opensource</td>
-<td></td>
-<td>?</td>
-<td>Lightweight Vector DB</td>
-<td>Not suitable for<br>Production</td>
-</tr>
-<tr>
-<td>ElasticSearch</td>
-<td>Mature, Full-text Vector Search</td>
-<td>Horizontal</td>
-<td>Commercial</td>
-<td>High Flexibility,<br>Query Filtering</td>
-<td>High Latency</td>
-<td>Vector Search Plugins</td>
-<td>Suitable for Production.<br>Flexible queries can help to improve<br>efficiency</td>
-</tr>
-<tr>
-<td>PgVector</td>
-<td>Vector Search using SQL</td>
-<td>NA</td>
-<td>Opensource<br><br>Azure pgvector<br>(enterprise)<br><br>GCP pgvector<br>(enterprise)</td>
-<td>Supports one index only</td>
-<td>Low latency</td>
-<td>Postgres Extension</td>
-<td>Efficient but depends on Postgres.</td>
-</tr>
-<tr>
-<td>PineCone DB</td>
-<td>Scalable, Instant Indexing</td>
-<td>Vertical</td>
-<td>Enterprise</td>
-<td></td>
-<td>Low latency</td>
-<td>Enterprise cloud-native<br>Vector database</td>
-<td>Production ready and Efficient</td>
-</tr>
-<tr>
-<td>Qdrant</td>
-<td>Filtering, precise matching</td>
-<td>Vertical</td>
-<td>Opensource</td>
-<td>Additional payloads<br>to filter results</td>
-<td>Low latency</td>
-<td></td>
-<td>Moderate data volume and Scalable</td>
-</tr>
-<tr>
-<td>LanceDB</td>
-<td>High Performance, Real time</td>
-<td>NA</td>
-<td>Opensource</td>
-<td></td>
-<td></td>
-<td>Lightweight Vector DB</td>
-<td>Production ready and Efficient</td>
-</tr>
-<tr>
-<td>Weaviate</td>
-<td>Knowledge Graph, GraphQL</td>
-<td>Horizontal</td>
-<td>Opensource</td>
-<td>Hybrid Search</td>
-<td>Low latency</td>
-<td>Lightweight Vector DB</td>
-<td>Moderate data volume and Scalable</td>
-</tr>
-</tbody>
+    <tr>
+        <td>Vector DB</td>
+        <td>When to Use</td>
+        <td>Scalability</td>
+        <td>OpenSource/Enterprise</td>
+        <td>Functionality</td>
+        <td>Performance</td>
+        <td>Type</td>
+        <td>Suitable <br>For</td>
+    </tr>
+    <tr>
+        <td>FAISS</td>
+        <td>Efficient for Large datasets</td>
+        <td>NA</td>
+        <td>Opensource</td>
+        <td>GPU availability</td>
+        <td>?</td>
+        <td>Vector Search</td>
+        <td>Offline evaluations/POCs.<br>Not suitable for Production</td>
+    </tr>
+    <tr>
+        <td>Milvus</td>
+        <td>1. Supports massive vector search<br>2. Auto Index Management<br>3. GPU availability</td>
+        <td>Horizontal</td>
+        <td>Opensource</td>
+        <td>11 Index,<br>Multi Vector Query,<br>Attribute Filtering,<br>GPU, ..</td>
+        <td>Low latency</td>
+        <td>Purpose built Vector DB</td>
+        <td>Large Data Volume<br>and Scalable</td>
+    </tr>
+    <tr>
+        <td>Chroma</td>
+        <td>Multimodal data</td>
+        <td>NA</td>
+        <td>Opensource</td>
+        <td></td>
+        <td>?</td>
+        <td>Lightweight Vector DB</td>
+        <td>Not suitable for<br>Production</td>
+    </tr>
+    <tr>
+        <td>ElasticSearch</td>
+        <td>Mature, Full-text Vector Search</td>
+        <td>Horizontal</td>
+        <td>Commercial</td>
+        <td>High Flexibility,<br>Query Filtering</td>
+        <td>High Latency</td>
+        <td>Vector Search Plugins</td>
+        <td>Suitable for Production.<br>Flexible queries can help to improve<br>efficiency</td>
+    </tr>
+    <tr>
+        <td>PgVector</td>
+        <td>Vector Search using SQL</td>
+        <td>NA</td>
+        <td>Opensource<br>Azure pgvector<br>(enterprise)<br>GCP pgvector<br>(enterprise)</td>
+        <td>Supports one index only</td>
+        <td>Low latency</td>
+        <td>Postgres Extension</td>
+        <td>Efficient but depends on Postgres.</td>
+    </tr>
+    <tr>
+        <td>PineCone DB</td>
+        <td>Scalable, Instant Indexing</td>
+        <td>Vertical</td>
+        <td>Enterprise</td>
+        <td></td>
+        <td>Low latency</td>
+        <td>Enterprise cloud-native<br>Vector database</td>
+        <td>Production ready and Efficient</td>
+    </tr>
+    <tr>
+        <td>Qdrant</td>
+        <td>Filtering, precise matching</td>
+        <td>Vertical</td>
+        <td>Opensource</td>
+        <td>Additional payloads<br>to filter results</td>
+        <td>Low latency</td>
+        <td></td>
+        <td>Moderate data volume and Scalable</td>
+    </tr>
+    <tr>
+        <td>LanceDB</td>
+        <td>High Performance, Real time</td>
+        <td>NA</td>
+        <td>Opensource</td>
+        <td></td>
+        <td></td>
+        <td>Lightweight Vector DB</td>
+        <td>Production ready and Efficient</td>
+    </tr>
+    <tr>
+        <td>Weaviate</td>
+        <td>Knowledge Graph, GraphQL</td>
+        <td>Horizontal</td>
+        <td>Opensource</td>
+        <td>Hybrid Search</td>
+        <td>Low latency</td>
+        <td>Lightweight Vector DB</td>
+        <td>Moderate data volume and Scalable</td>
+    </tr>
 </table>
+
 <h3>Example code to index documents in Pinecone (Enterprise DB)</h3>
 <p>In the code below, we are using sentence splitter to split the documents into chunks, and applying embedding model(example OpenAI, Gemini etc) to extract the embeddings in the function create_ingestion_pipeline</p>
 <p>and we are indexing the embeddings in Pinecone DB in the function store_embeddings_in_pinecone</p>
-<p>```python </p>
-<p>def create_ingestion_pipeline(vector_store):
-    """</p>
-<div class="highlight"><pre><span></span><code><span class="nx">Ingestion</span><span class="w"> </span><span class="nx">Pipeline</span><span class="w"> </span><span class="nx">helps</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">chunking</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">embeddings</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="nx">Indexing</span><span class="p">.</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_ingestion_pipeline</span><span class="p">(</span><span class="n">vector_store</span><span class="p">):</span>
+    <span class="n">sentence_splitter</span> <span class="o">=</span> <span class="n">SentenceSplitter</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">IngestionPipeline</span><span class="p">(</span>
+        <span class="n">transformations</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">sentence_splitter</span><span class="p">,</span> 
+            <span class="n">embed_model</span>
+            <span class="p">],</span>
+        <span class="n">vector_store</span><span class="o">=</span><span class="n">vector_store</span><span class="p">,</span>
+        <span class="n">docstore</span><span class="o">=</span><span class="n">SimpleDocumentStore</span><span class="p">(),</span> <span class="c1"># For Document Management | Avoiding duplicates in index</span>
+    <span class="p">)</span>
 
-<span class="nx">Following</span><span class="w"> </span><span class="nx">does</span><span class="w"> </span><span class="nx">chunking</span><span class="p">,</span><span class="w"> </span><span class="nx">creating</span><span class="w"> </span><span class="nx">embeddings</span><span class="p">,</span><span class="w"> </span><span class="nx">caching</span><span class="p">,</span><span class="w"> </span><span class="nx">document</span><span class="w"> </span><span class="nx">management</span>
+    <span class="k">return</span> <span class="n">pipeline</span>
 
-<span class="nx">Read</span><span class="w"> </span><span class="nx">this</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">store_embeddings_in_pinecone</span><span class="p">(</span><span class="n">documents</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract Embeddings(defined in IngestionPipeline) and store in PineconeDB</span>
 
-<span class="nx">https</span><span class="p">:</span><span class="c1">//clusteredbytes.pages.dev/posts/2024/llamaindex-ingestion-pipeline/</span>
-<span class="s">&quot;&quot;</span><span class="err">&quot;</span>
-<span class="nx">sentence_splitter</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">SentenceSplitter</span><span class="p">(</span><span class="nx">chunk_size</span><span class="p">=</span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="nx">chunk_overlap</span><span class="p">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="nx">pipeline</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">IngestionPipeline</span><span class="p">(</span>
-<span class="w">    </span><span class="nx">transformations</span><span class="p">=[</span>
-<span class="w">        </span><span class="nx">sentence_splitter</span><span class="p">,</span><span class="w"> </span>
-<span class="w">        </span><span class="nx">embed_model</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">    </span><span class="nx">vector_store</span><span class="p">=</span><span class="nx">vector_store</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">docstore</span><span class="p">=</span><span class="nx">SimpleDocumentStore</span><span class="p">(),</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="nx">For</span><span class="w"> </span><span class="nx">Document</span><span class="w"> </span><span class="nx">Management</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">Avoiding</span><span class="w"> </span><span class="nx">duplicates</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">index</span>
-<span class="p">)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        documents ([type]): [description]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pinecone_client</span> <span class="o">=</span> <span class="n">Pinecone</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">pinecone_key</span><span class="p">)</span>
+    <span class="n">pinecone_index</span> <span class="o">=</span> <span class="n">pinecone_client</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="s2">&quot;demo&quot;</span><span class="p">)</span>
+    <span class="n">vector_store</span> <span class="o">=</span> <span class="n">PineconeVectorStore</span><span class="p">(</span><span class="n">pinecone_index</span><span class="o">=</span><span class="n">pinecone_index</span><span class="p">)</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">create_ingestion_pipeline</span><span class="p">(</span><span class="n">vector_store</span><span class="p">)</span>
 
-<span class="k">return</span><span class="w"> </span><span class="nx">pipeline</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">documents</span><span class="o">=</span><span class="n">documents</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">vector_store</span>
 </code></pre></div>
-
-<p>def store_embeddings_in_pinecone(documents):
-    """Extract Embeddings(defined in IngestionPipeline) and store in PineconeDB</p>
-<div class="highlight"><pre><span></span><code><span class="nl">Args</span><span class="p">:</span>
-<span class="w">    </span><span class="n">documents</span><span class="w"> </span><span class="p">(</span><span class="o">[</span><span class="n">type</span><span class="o">]</span><span class="p">)</span><span class="err">:</span><span class="w"> </span><span class="o">[</span><span class="n">description</span><span class="o">]</span>
-<span class="ss">&quot;&quot;&quot;</span>
-<span class="ss">pinecone_client = Pinecone(api_key=pinecone_key)</span>
-<span class="ss">pinecone_index = pinecone_client.Index(&quot;</span><span class="n">demo</span><span class="err">&quot;</span><span class="p">)</span>
-<span class="n">vector_store</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PineconeVectorStore</span><span class="p">(</span><span class="n">pinecone_index</span><span class="o">=</span><span class="n">pinecone_index</span><span class="p">)</span>
-<span class="n">pipeline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">create_ingestion_pipeline</span><span class="p">(</span><span class="n">vector_store</span><span class="p">)</span>
-
-<span class="n">nodes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pipeline</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">documents</span><span class="o">=</span><span class="n">documents</span><span class="p">)</span>
-
-<span class="k">return</span><span class="w"> </span><span class="n">vector_store</span>
-</code></pre></div>
-
-<p>``</p>
 
 
              
